@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍓 Клубничка — Админка</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+    --bg:#09050a;
+    --panel:#140b15;
+    --pink:#ff2b91;
+    --red:#ff1744;
+    --strawberry:#ff3d71;
+    --gold:#ffd54a;
+    --cyan:#00e5ff;
+    --lime:#7cff4f;
+    --text:#fff;
+    --muted:#aaa;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    font-family:Arial,sans-serif;
+    color:var(--text);
+    background:
+        radial-gradient(circle at 20% 10%,rgba(255,43,145,.18),transparent 30%),
+        radial-gradient(circle at 80% 90%,rgba(255,23,68,.14),transparent 30%),
+        var(--bg);
+}
+
+.container{
+    width:min(1100px,94%);
+    margin:35px auto;
+}
+
+.logo{
+    text-align:center;
+    font-size:38px;
+    font-weight:900;
+    color:#fff;
+    text-shadow:
+        0 0 10px var(--pink),
+        0 0 25px var(--pink);
+    margin-bottom:30px;
+}
+
+.panel{
+    background:rgba(20,11,21,.92);
+    border:1px solid rgba(255,43,145,.6);
+    border-radius:18px;
+    padding:25px;
+    margin-bottom:20px;
+    box-shadow:
+        0 0 15px rgba(255,43,145,.15),
+        inset 0 0 25px rgba(255,43,145,.03);
+}
+
+h2{
+    margin-top:0;
+    color:var(--pink);
+    text-shadow:0 0 10px rgba(255,43,145,.6);
+}
+
+.login{
+    max-width:500px;
+    margin:80px auto;
+}
+
+input{
+    width:100%;
+    padding:14px 16px;
+    margin:7px 0;
+    border-radius:10px;
+    border:1px solid rgba(255,43,145,.5);
+    background:#0c080d;
+    color:white;
+    font-size:16px;
+    outline:none;
+}
+
+input:focus{
+    border-color:var(--pink);
+    box-shadow:0 0 10px rgba(255,43,145,.25);
+}
+
+.row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+button{
+    border:0;
+    border-radius:10px;
+    padding:13px 20px;
+    font-size:16px;
+    font-weight:800;
+    color:white;
+    cursor:pointer;
+    transition:.2s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.15);
+}
+
+.btn-pink{
+    background:linear-gradient(135deg,#ff176f,#ff2b91);
+    box-shadow:0 0 15px rgba(255,43,145,.35);
+}
+
+.btn-green{
+    background:linear-gradient(135deg,#36b94d,#7cff4f);
+    color:#071007;
+}
+
+.btn-red{
+    background:linear-gradient(135deg,#ff1744,#c50035);
+}
+
+.btn-gray{
+    background:#29232b;
+}
+
+.xbox{
+    margin-top:20px;
+    text-align:center;
+    padding:25px;
+    border:1px solid rgba(255,213,74,.5);
+    border-radius:15px;
+    background:rgba(255,213,74,.04);
+}
+
+.xlabel{
+    color:var(--muted);
+    font-size:15px;
+}
+
+.xvalue{
+    font-size:72px;
+    font-weight:900;
+    color:var(--gold);
+    text-shadow:
+        0 0 10px var(--gold),
+        0 0 30px rgba(255,213,74,.5);
+}
+
+.participant-add{
+    display:flex;
+    gap:10px;
+}
+
+.participant-add input{
+    margin:0;
+}
+
+.participant-list{
+    margin-top:15px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.participant{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:13px 15px;
+    border-radius:10px;
+    background:#0c080d;
+    border:1px solid rgba(255,43,145,.2);
+}
+
+.number{
+    color:var(--pink);
+    font-weight:bold;
+    margin-right:10px;
+}
+
+.winner{
+    text-align:center;
+    padding:35px 15px;
+    margin-top:20px;
+    border:2px solid var(--lime);
+    border-radius:18px;
+    background:rgba(124,255,79,.04);
+    box-shadow:0 0 30px rgba(124,255,79,.2);
+    display:none;
+}
+
+.winner-title{
+    color:var(--lime);
+    font-size:20px;
+    font-weight:bold;
+}
+
+.winner-name{
+    font-size:48px;
+    font-weight:900;
+    margin:15px 0;
+    text-shadow:0 0 15px var(--lime);
+}
+
+.winner-x{
+    font-size:34px;
+    color:var(--gold);
+    font-weight:900;
+}
+
+.status{
+    margin-top:12px;
+    padding:12px;
+    border-radius:10px;
+    background:#0c080d;
+    color:var(--muted);
+    text-align:center;
+}
+
+.hidden{
+    display:none!important;
+}
+
+@media(max-width:700px){
+    .row{
+        grid-template-columns:1fr;
+    }
+
+    .xvalue{
+        font-size:55px;
+    }
+
+    .winner-name{
+        font-size:34px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="loginScreen" class="container login">
+    <div class="logo">🍓 КЛУБНИЧКА</div>
+
+    <div class="panel">
+        <h2>🔐 Вход администратора</h2>
+
+        <input id="email" type="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Пароль">
+
+        <button class="btn-pink" style="width:100%;margin-top:10px" onclick="login()">
+            Войти
+        </button>
+
+        <div id="loginStatus" class="status"></div>
+    </div>
+</div>
+
+
+<div id="adminScreen" class="container hidden">
+
+    <div class="logo">🍓 КЛУБНИЧКА — АДМИНКА</div>
+
+    <div class="panel">
+        <h2>💰 Настройка розыгрыша</h2>
+
+        <div class="row">
+
+            <div>
+                <label>Призовая стоимость, ₽</label>
+                <input
+                    id="prizeCost"
+                    type="number"
+                    min="0"
+                    placeholder="Например: 5000"
+                    oninput="calculateX()"
+                >
+            </div>
+
+            <div>
+                <label>Выигрыш, ₽</label>
+                <input
+                    id="winAmount"
+                    type="number"
+                    min="0"
+                    placeholder="Например: 15000"
+                    oninput="calculateX()"
+                >
+            </div>
+
+        </div>
+
+        <div class="xbox">
+            <div class="xlabel">МНОЖИТЕЛЬ ВЫИГРЫША</div>
+            <div id="xValue" class="xvalue">0.00X</div>
+        </div>
+    </div>
+
+
+    <div class="panel">
+
+        <h2>👥 Участники</h2>
+
+        <div class="participant-add">
+            <input
+                id="participantInput"
+                type="text"
+                placeholder="Введите имя участника"
+                onkeydown="if(event.key==='Enter') addParticipant()"
+            >
+
+            <button class="btn-pink" onclick="addParticipant()">
+                + Добавить
+            </button>
+        </div>
+
+        <div id="participantList" class="participant-list"></div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h2>🎰 Розыгрыш</h2>
+
+        <button
+            class="btn-green"
+            style="width:100%;font-size:20px;padding:18px"
+            onclick="startDraw()"
+        >
+            🎰 ЗАПУСТИТЬ РОЗЫГРЫШ
+        </button>
+
+        <button
+            class="btn-gray"
+            style="width:100%;margin-top:10px"
+            onclick="saveData()"
+        >
+            💾 Сохранить данные
+        </button>
+
+        <div id="saveStatus" class="status">
+            Данные ещё не сохранены
+        </div>
+
+    </div>
+
+
+    <div id="winnerBox" class="winner">
+
+        <div class="winner-title">
+            🏆 ПОБЕДИТЕЛЬ 🏆
+        </div>
+
+        <div id="winnerName" class="winner-name">
+            —
+        </div>
+
+        <div id="winnerX" class="winner-x">
+            0.00X
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const SUPABASE_URL = "https://vfewetptlvauwxnskjew.supabase.co";
+
+/*
+sb_publishable_6mkpBEPtYcfXbPiuToSWcA_bd3dgFZw
+*/
+const SUPABASE_KEY = "sb_publishable_6mkpBEPtYcfXbPiuToSWcA_bd3dgFZw";
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+let participants = [];
+let prizeCost = 0;
+let winAmount = 0;
+let multiplier = 0;
+let winner = "";
+
+
+/* =========================
+   АВТОРИЗАЦИЯ
+========================= */
+
+async function login(){
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    const status = document.getElementById("loginStatus");
+
+    if(!email || !password){
+        status.textContent = "Введите email и пароль";
+        return;
+    }
+
+    status.textContent = "Выполняем вход...";
+
+    const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+    if(error){
+
+        status.textContent = "Ошибка входа: " + error.message;
+        return;
+
+    }
+
+    document.getElementById("loginScreen").classList.add("hidden");
+    document.getElementById("adminScreen").classList.remove("hidden");
+
+    await loadData();
+}
+
+
+/* =========================
+   РАСЧЁТ X
+========================= */
+
+function calculateX(){
+
+    prizeCost =
+        Number(document.getElementById("prizeCost").value) || 0;
+
+    winAmount =
+        Number(document.getElementById("winAmount").value) || 0;
+
+    if(prizeCost > 0){
+
+        multiplier = winAmount / prizeCost;
+
+    }else{
+
+        multiplier = 0;
+
+    }
+
+    document.getElementById("xValue").textContent =
+        multiplier.toFixed(2) + "X";
+}
+
+
+/* =========================
+   УЧАСТНИКИ
+========================= */
+
+function addParticipant(){
+
+    const input =
+        document.getElementById("participantInput");
+
+    const name = input.value.trim();
+
+    if(!name){
+        return;
+    }
+
+    participants.push(name);
+
+    input.value = "";
+
+    renderParticipants();
+}
+
+
+function removeParticipant(index){
+
+    participants.splice(index,1);
+
+    renderParticipants();
+}
+
+
+function renderParticipants(){
+
+    const list =
+        document.getElementById("participantList");
+
+    if(participants.length === 0){
+
+        list.innerHTML =
+            '<div class="status">Участников пока нет</div>';
+
+        return;
+    }
+
+    list.innerHTML = participants.map((name,index)=>`
+
+        <div class="participant">
+
+            <div>
+                <span class="number">#${index + 1}</span>
+                ${escapeHtml(name)}
+            </div>
+
+            <button
+                class="btn-red"
+                onclick="removeParticipant(${index})"
+            >
+                Удалить
+            </button>
+
+        </div>
+
+    `).join("");
+}
+
+
+/* =========================
+   РОЗЫГРЫШ
+========================= */
+
+async function startDraw(){
+
+    if(participants.length === 0){
+
+        alert("Сначала добавь участников!");
+        return;
+
+    }
+
+    if(prizeCost <= 0 || winAmount <= 0){
+
+        alert("Сначала укажи призовую стоимость и выигрыш!");
+        return;
+
+    }
+
+    const button =
+        event.target;
+
+    button.disabled = true;
+
+    /*
+      Небольшая анимация выбора.
+    */
+
+    const winnerBox =
+        document.getElementById("winnerBox");
+
+    const winnerName =
+        document.getElementById("winnerName");
+
+    winnerBox.style.display = "block";
+
+    let counter = 0;
+
+    const animation = setInterval(()=>{
+
+        const random =
+            participants[
+                Math.floor(Math.random() * participants.length)
+            ];
+
+        winnerName.textContent = random;
+
+        counter++;
+
+        if(counter >= 25){
+
+            clearInterval(animation);
+
+            winner =
+                participants[
+                    Math.floor(Math.random() * participants.length)
+                ];
+
+            winnerName.textContent = winner;
+
+            document.getElementById("winnerX").textContent =
+                multiplier.toFixed(2) + "X";
+
+            saveData();
+
+            button.disabled = false;
+
+        }
+
+    },100);
+
+}
+
+
+/* =========================
+   SUPABASE
+========================= */
+
+async function saveData(){
+
+    calculateX();
+
+    const state = {
+
+        participants: participants,
+
+        prizeCost: prizeCost,
+
+        winAmount: winAmount,
+
+        multiplier: multiplier,
+
+        winner: winner,
+
+        updatedAt: new Date().toISOString()
+
+    };
+
+    const { error } =
+        await supabaseClient
+            .from("tournaments")
+            .upsert({
+                id: 1,
+                title: "Клубничка",
+                prize: String(winAmount),
+                data: state
+            });
+
+    const status =
+        document.getElementById("saveStatus");
+
+    if(error){
+
+        status.textContent =
+            "❌ Ошибка сохранения: " + error.message;
+
+        console.error(error);
+
+        return;
+
+    }
+
+    status.textContent =
+        "✅ Данные сохранены в Supabase";
+
+}
+
+
+async function loadData(){
+
+    const { data, error } =
+        await supabaseClient
+            .from("tournaments")
+            .select("*")
+            .eq("id",1)
+            .maybeSingle();
+
+    if(error){
+
+        console.error(error);
+        return;
+
+    }
+
+    if(!data || !data.data){
+
+        renderParticipants();
+        return;
+
+    }
+
+    const state = data.data;
+
+    participants =
+        Array.isArray(state.participants)
+            ? state.participants
+            : [];
+
+    prizeCost =
+        Number(state.prizeCost) || 0;
+
+    winAmount =
+        Number(state.winAmount) || 0;
+
+    multiplier =
+        Number(state.multiplier) || 0;
+
+    winner =
+        state.winner || "";
+
+    document.getElementById("prizeCost").value =
+        prizeCost || "";
+
+    document.getElementById("winAmount").value =
+        winAmount || "";
+
+    document.getElementById("xValue").textContent =
+        multiplier.toFixed(2) + "X";
+
+    renderParticipants();
+
+    if(winner){
+
+        document.getElementById("winnerBox").style.display =
+            "block";
+
+        document.getElementById("winnerName").textContent =
+            winner;
+
+        document.getElementById("winnerX").textContent =
+            multiplier.toFixed(2) + "X";
+
+    }
+
+}
+
+
+/* =========================
+   ЗАЩИТА HTML
+========================= */
+
+function escapeHtml(text){
+
+    return text
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+}
+
+
+/* =========================
+   ПРОВЕРКА СЕССИИ
+========================= */
+
+async function checkSession(){
+
+    const { data } =
+        await supabaseClient.auth.getSession();
+
+    if(data.session){
+
+        document.getElementById("loginScreen")
+            .classList.add("hidden");
+
+        document.getElementById("adminScreen")
+            .classList.remove("hidden");
+
+        await loadData();
+
+    }
+
+}
+
+checkSession();
+
+</script>
+
+</body>
+</html>
