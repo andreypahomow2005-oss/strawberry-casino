@@ -1573,10 +1573,19 @@ async function loadData(){
         data.data;
 
 
-    participants =
-        Array.isArray(state.participants)
-        ? state.participants
-        : [];
+ participants =
+    Array.isArray(state.participants)
+    ? state.participants.map(p => ({
+        ...p,
+        x: Number.isFinite(Number(p.x))
+            ? Number(p.x)
+            : (
+                Number(p.cost) > 0
+                    ? Number(p.win) / Number(p.cost)
+                    : 0
+            )
+    }))
+    : [];
 
 
     tournamentStarted =
