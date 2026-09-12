@@ -958,7 +958,7 @@ function renderTable(){
                         </td>
 
                         <td class="x-small">
-                            ${p.x.toFixed(2)}X
+                           ${Number(p.x ?? (Number(p.cost) > 0 ? Number(p.win) / Number(p.cost) : 0)).toFixed(2)}X
                         </td>
 
                         <td>
