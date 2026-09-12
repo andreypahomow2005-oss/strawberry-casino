@@ -774,7 +774,7 @@ function calculateCurrentX(){
    ДОБАВЛЕНИЕ
 ========================================== */
 
-function addParticipant(){
+async function addParticipant(){
 
     if(tournamentStarted){
 
@@ -879,7 +879,7 @@ function addParticipant(){
 
     renderTable();
 
-    await saveData();
+   saveData();
 
 
     if(participants.length === 8){
