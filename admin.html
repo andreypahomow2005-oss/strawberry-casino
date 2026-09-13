@@ -661,7 +661,13 @@ let semiWinners = [
 ];
 
 let champion = null;
+let roundResults = {
+    quarter: [null, null, null, null],
+    semi: [null, null],
+    final: null
+};
 
+let pendingResult = null;
 
 /* ==========================================
    ВХОД
