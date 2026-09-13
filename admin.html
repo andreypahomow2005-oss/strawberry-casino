@@ -352,6 +352,21 @@ button:disabled{
         font-size:30px;
     }
 }
+
+<style>
+.current-result{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    margin-top:15px;
+}
+@media(max-width:800px){
+    .current-result{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+
 </style>
 </head>
 
@@ -394,7 +409,7 @@ button:disabled{
     </div>
 
 
-    <!-- ДОБАВЛЕНИЕ УЧАСТНИКА -->
+    <!-- ДОБАВЛЕНИЕ 8 УЧАСТНИКОВ -->
 
     <div class="panel">
 
@@ -404,69 +419,44 @@ button:disabled{
             Участников: <span id="count">0</span> / 8
         </div>
 
-        <div class="add-grid">
+        <div class="row">
 
             <div>
                 <label>Имя участника</label>
                 <input
                     id="nameInput"
                     placeholder="Например: Макс"
+                    oninput="updateCurrentName()"
                 >
             </div>
 
             <div>
-                <label>Стоимость бонуса, ₽</label>
-                <input
-                    id="costInput"
-                    type="number"
-                    min="0"
-                    placeholder="5000"
-                    oninput="calculateCurrentX()"
+                <button
+                    id="addButton"
+                    class="btn-pink"
+                    style="width:100%;margin-top:6px"
+                    onclick="addParticipant()"
                 >
-            </div>
-
-            <div>
-                <label>Выигрыш, ₽</label>
-                <input
-                    id="winInput"
-                    type="number"
-                    min="0"
-                    placeholder="15000"
-                    oninput="calculateCurrentX()"
-                >
+                    ➕ ДОБАВИТЬ
+                </button>
             </div>
 
         </div>
 
-
         <div class="current">
 
             <div class="current-title">
-                🎰 Текущий выбранный участник
+                👤 Новый участник
             </div>
 
             <div id="currentName" class="current-name">
                 —
             </div>
 
-            <div class="xbox">
-
-                <div>МНОЖИТЕЛЬ</div>
-
-                <div id="currentX" class="xvalue">
-                    0.00X
-                </div>
-
+            <div class="status">
+                В первые 8 участников записывается только имя.
+                Результаты, слот, стоимость, выигрыш и X вводятся отдельно в каждом раунде.
             </div>
-
-            <button
-                id="addButton"
-                class="btn-pink"
-                style="width:100%;margin-top:15px"
-                onclick="addParticipant()"
-            >
-                ➕ ДОБАВИТЬ В ТАБЛИЦУ
-            </button>
 
         </div>
 
@@ -491,8 +481,7 @@ button:disabled{
         <h2>🔥 Все 8 участников готовы!</h2>
 
         <p style="color:#bbb">
-            Все участники записаны. Теперь можно построить
-            турнирную сетку и начать дуэли.
+            Все участники записаны. Теперь можно начать турнир.
         </p>
 
         <button
@@ -506,84 +495,103 @@ button:disabled{
     </div>
 
 
+    <!-- РЕЗУЛЬТАТ РАУНДА -->
+
+    <div id="roundResultPanel" class="panel hidden">
+
+        <h2>🎰 РЕЗУЛЬТАТ РАУНДА</h2>
+
+        <div class="status">
+            Участник:
+            <strong id="resultPlayerName">—</strong>
+        </div>
+
+        <div class="status">
+            Раунд:
+            <strong id="resultRoundName">—</strong>
+        </div>
+
+        <div class="add-grid">
+
+            <div>
+                <label>Название слота</label>
+                <input
+                    id="resultSlotInput"
+                    placeholder="Например: Sweet Bonanza"
+                >
+            </div>
+
+            <div>
+                <label>Стоимость бонуса, ₽</label>
+                <input
+                    id="resultCostInput"
+                    type="number"
+                    min="0"
+                    placeholder="5000"
+                    oninput="calculateRoundX()"
+                >
+            </div>
+
+            <div>
+                <label>Выигрыш, ₽</label>
+                <input
+                    id="resultWinInput"
+                    type="number"
+                    min="0"
+                    placeholder="15000"
+                    oninput="calculateRoundX()"
+                >
+            </div>
+
+        </div>
+
+        <div class="current">
+
+            <div class="current-title">
+                📊 Результат
+            </div>
+
+            <div class="current-name" id="resultPreviewName">
+                —
+            </div>
+
+            <div class="status">
+                <span>Множитель:</span>
+                <strong id="resultX" class="x-small">0.00X</strong>
+            </div>
+
+        </div>
+
+        <button
+            class="btn-green"
+            style="width:100%;margin-top:15px"
+            onclick="saveRoundResult()"
+        >
+            💾 СОХРАНИТЬ РЕЗУЛЬТАТ И ПРОВЕСТИ ДАЛЬШЕ
+        </button>
+
+        <button
+            class="btn-gray"
+            style="width:100%;margin-top:10px"
+            onclick="closeRoundResult()"
+        >
+            Отмена
+        </button>
+
+        <div id="roundResultStatus" class="status"></div>
+
+    </div>
+
+
     <!-- СЕТКА -->
-<div id="roundResultPanel" class="panel hidden">
 
-    <h2>🎰 РЕЗУЛЬТАТ РАУНДА</h2>
-
-    <div class="status">
-        Участник:
-        <strong id="resultPlayerName">—</strong>
-    </div>
-
-    <div class="status">
-        Раунд:
-        <strong id="resultRoundName">—</strong>
-    </div>
-
-    <div class="add-grid">
-
-        <div>
-            <label>Название слота</label>
-            <input
-                id="resultSlotInput"
-                placeholder="Например: Sweet Bonanza"
-            >
-        </div>
-
-        <div>
-            <label>Стоимость бонуса, ₽</label>
-            <input
-                id="resultCostInput"
-                type="number"
-                min="0"
-                placeholder="5000"
-                oninput="calculateRoundX()"
-            >
-        </div>
-
-        <div>
-            <label>Выигрыш, ₽</label>
-            <input
-                id="resultWinInput"
-                type="number"
-                min="0"
-                placeholder="15000"
-                oninput="calculateRoundX()"
-            >
-        </div>
-
-    </div>
-
-    <div class="current-result">
-
-        <div>
-            <span>Участник</span>
-            <strong id="resultPreviewName">—</strong>
-        </div>
-
-        <div>
-            <span>X</span>
-            <strong id="resultX">0.00X</strong>
-        </div>
-
-    </div>
-
-    <button
-        class="btn"
-        onclick="saveRoundResult()"
-    >
-        💾 СОХРАНИТЬ РЕЗУЛЬТАТ
-    </button>
-
-</div>
     <div id="bracketPanel" class="panel hidden">
 
         <h2>🏆 ТУРНИРНАЯ СЕТКА</h2>
 
         <div class="status">
-            Нажимай на победителя каждой пары.
-            Победитель проходит дальше.
+            Нажми на участника — введи его новый результат для текущего раунда.
+            После сохранения он проходит дальше.
         </div>
 
         <div class="bracket">
@@ -689,18 +697,8 @@ button:disabled{
 const SUPABASE_URL =
     "https://vfewetptlvauwxnskjew.supabase.co";
 
-/*
-   ВСТАВЬ СЮДА СВОЙ PUBLISHABLE KEY.
-
-   Начинается примерно так:
-   sb_publishable_...
-
-   SECRET KEY НЕ ВСТАВЛЯТЬ.
-*/
-
 const SUPABASE_KEY =
     "sb_publishable_6mkpBEPtYcfXbPiuToSWcA_bd3dgFZw";
-
 
 const supabaseClient =
     supabase.createClient(
@@ -730,13 +728,36 @@ let semiWinners = [
 ];
 
 let champion = null;
+
+
+/*
+   Результат КАЖДОГО раунда хранится отдельно.
+
+   quarter[0] = результат 1-й пары 1/4
+   quarter[1] = результат 2-й пары 1/4
+   quarter[2] = результат 3-й пары 1/4
+   quarter[3] = результат 4-й пары 1/4
+
+   semi[0] = результат 1-го полуфинала
+   semi[1] = результат 2-го полуфинала
+
+   final = результат финала
+*/
+
 let roundResults = {
     quarter: [null, null, null, null],
     semi: [null, null],
     final: null
 };
 
+
+/*
+   Временный выбранный участник,
+   для которого сейчас вводится результат.
+*/
+
 let pendingResult = null;
+
 
 /* ==========================================
    ВХОД
@@ -757,7 +778,7 @@ async function login(){
     if(!email || !password){
 
         status.textContent =
-            "Введите email и пароль";
+            "Введите email и пароль.";
 
         return;
     }
@@ -767,7 +788,7 @@ async function login(){
         "Выполняем вход...";
 
 
-    const { data, error } =
+    const { error } =
         await supabaseClient.auth.signInWithPassword({
 
             email:email,
@@ -801,41 +822,16 @@ async function login(){
 
 
 /* ==========================================
-   X
+   ИМЯ НОВОГО УЧАСТНИКА
 ========================================== */
 
-function calculateCurrentX(){
-
-    const cost =
-        Number(
-            document.getElementById("costInput").value
-        ) || 0;
-
-    const win =
-        Number(
-            document.getElementById("winInput").value
-        ) || 0;
-
-
-    let x = 0;
-
-
-    if(cost > 0){
-
-        x = win / cost;
-
-    }
-
-
-    document
-        .getElementById("currentX")
-        .textContent =
-        x.toFixed(2) + "X";
-
+function updateCurrentName(){
 
     const name =
-        document.getElementById("nameInput").value.trim();
-
+        document
+            .getElementById("nameInput")
+            .value
+            .trim();
 
     document
         .getElementById("currentName")
@@ -846,7 +842,7 @@ function calculateCurrentX(){
 
 
 /* ==========================================
-   ДОБАВЛЕНИЕ
+   ДОБАВЛЕНИЕ УЧАСТНИКА
 ========================================== */
 
 async function addParticipant(){
@@ -868,22 +864,10 @@ async function addParticipant(){
 
 
     const name =
-        document.getElementById("nameInput")
-            .value.trim();
-
-
-    const cost =
-        Number(
-            document.getElementById("costInput")
-                .value
-        ) || 0;
-
-
-    const win =
-        Number(
-            document.getElementById("winInput")
-                .value
-        ) || 0;
+        document
+            .getElementById("nameInput")
+            .value
+            .trim();
 
 
     if(!name){
@@ -894,37 +878,11 @@ async function addParticipant(){
     }
 
 
-    if(cost <= 0){
-
-        alert("Введите стоимость бонуса.");
-
-        return;
-    }
-
-
-    if(win < 0){
-
-        alert("Введите правильный выигрыш.");
-
-        return;
-    }
-
-
-    const x =
-        win / cost;
-
-
     participants.push({
 
         id:Date.now() + Math.random(),
 
-        name:name,
-
-        cost:cost,
-
-        win:win,
-
-        x:x
+        name:name
 
     });
 
@@ -933,28 +891,15 @@ async function addParticipant(){
         .getElementById("nameInput")
         .value = "";
 
-    document
-        .getElementById("costInput")
-        .value = "";
-
-    document
-        .getElementById("winInput")
-        .value = "";
-
 
     document
         .getElementById("currentName")
         .textContent = "—";
 
 
-    document
-        .getElementById("currentX")
-        .textContent = "0.00X";
-
-
     renderTable();
 
-saveData();
+    await saveData();
 
 
     if(participants.length === 8){
@@ -1003,9 +948,6 @@ function renderTable(){
 
                     <th>#</th>
                     <th>Участник</th>
-                    <th>Стоимость</th>
-                    <th>Выигрыш</th>
-                    <th>X</th>
                     <th></th>
 
                 </tr>
@@ -1022,18 +964,6 @@ function renderTable(){
 
                         <td>
                             <b>${escapeHtml(p.name)}</b>
-                        </td>
-
-                        <td>
-                            ${formatMoney(p.cost)}
-                        </td>
-
-                        <td>
-                            ${formatMoney(p.win)}
-                        </td>
-
-                        <td class="x-small">
-                           ${Number(p.x ?? (Number(p.cost) > 0 ? Number(p.win) / Number(p.cost) : 0)).toFixed(2)}X
                         </td>
 
                         <td>
@@ -1065,7 +995,7 @@ function renderTable(){
    УДАЛЕНИЕ
 ========================================== */
 
-function removeParticipant(index){
+async function removeParticipant(index){
 
     if(tournamentStarted){
 
@@ -1077,9 +1007,17 @@ function removeParticipant(index){
 
     renderTable();
 
-    document
-        .getElementById("startTournamentBox")
-        .classList.add("hidden");
+
+    if(participants.length < 8){
+
+        document
+            .getElementById("startTournamentBox")
+            .classList.add("hidden");
+
+    }
+
+
+    await saveData();
 
 }
 
@@ -1118,6 +1056,16 @@ async function startTournament(){
     champion = null;
 
 
+    roundResults = {
+        quarter: [null, null, null, null],
+        semi: [null, null],
+        final: null
+    };
+
+
+    pendingResult = null;
+
+
     document
         .getElementById("startTournamentBox")
         .classList.add("hidden");
@@ -1126,6 +1074,383 @@ async function startTournament(){
     document
         .getElementById("bracketPanel")
         .classList.remove("hidden");
+
+
+    renderBracket();
+
+    await saveData();
+
+}
+
+
+/* ==========================================
+   ОКНО РЕЗУЛЬТАТА
+========================================== */
+
+function getRoundLabel(round){
+
+    if(round === "quarter"){
+        return "1/4 ФИНАЛА";
+    }
+
+    if(round === "semi"){
+        return "1/2 ФИНАЛА";
+    }
+
+    return "ФИНАЛ";
+
+}
+
+
+function getResultForPlayer(round, matchIndex, player){
+
+    let result = null;
+
+
+    if(round === "quarter"){
+        result = roundResults.quarter[matchIndex];
+    }
+
+    if(round === "semi"){
+        result = roundResults.semi[matchIndex];
+    }
+
+    if(round === "final"){
+        result = roundResults.final;
+    }
+
+
+    if(
+        result &&
+        player &&
+        result.player &&
+        String(result.player.id) === String(player.id)
+    ){
+
+        return result;
+    }
+
+
+    return null;
+
+}
+
+
+function openRoundResult(round, matchIndex, player){
+
+    if(!player){
+        return;
+    }
+
+
+    pendingResult = {
+        round:round,
+        matchIndex:matchIndex,
+        player:{
+            id:player.id,
+            name:player.name
+        }
+    };
+
+
+    const oldResult =
+        round === "quarter"
+        ? roundResults.quarter[matchIndex]
+        : round === "semi"
+            ? roundResults.semi[matchIndex]
+            : roundResults.final;
+
+
+    document
+        .getElementById("roundResultPanel")
+        .classList.remove("hidden");
+
+
+    document
+        .getElementById("resultPlayerName")
+        .textContent =
+        player.name;
+
+
+    document
+        .getElementById("resultPreviewName")
+        .textContent =
+        player.name;
+
+
+    document
+        .getElementById("resultRoundName")
+        .textContent =
+        getRoundLabel(round);
+
+
+    document
+        .getElementById("resultSlotInput")
+        .value =
+        oldResult &&
+        oldResult.player &&
+        String(oldResult.player.id) === String(player.id)
+            ? oldResult.slot
+            : "";
+
+
+    document
+        .getElementById("resultCostInput")
+        .value =
+        oldResult &&
+        oldResult.player &&
+        String(oldResult.player.id) === String(player.id)
+            ? oldResult.cost
+            : "";
+
+
+    document
+        .getElementById("resultWinInput")
+        .value =
+        oldResult &&
+        oldResult.player &&
+        String(oldResult.player.id) === String(player.id)
+            ? oldResult.win
+            : "";
+
+
+    calculateRoundX();
+
+
+    document
+        .getElementById("roundResultStatus")
+        .textContent =
+        "Введите НОВЫЙ результат именно для этого раунда.";
+
+
+    document
+        .getElementById("roundResultPanel")
+        .scrollIntoView({
+            behavior:"smooth",
+            block:"center"
+        });
+
+}
+
+
+function closeRoundResult(){
+
+    pendingResult = null;
+
+    document
+        .getElementById("roundResultPanel")
+        .classList.add("hidden");
+
+}
+
+
+function calculateRoundX(){
+
+    const cost =
+        Number(
+            document
+                .getElementById("resultCostInput")
+                .value
+        ) || 0;
+
+
+    const win =
+        Number(
+            document
+                .getElementById("resultWinInput")
+                .value
+        ) || 0;
+
+
+    let x = 0;
+
+
+    if(cost > 0){
+
+        x = win / cost;
+
+    }
+
+
+    document
+        .getElementById("resultX")
+        .textContent =
+        x.toFixed(2) + "X";
+
+}
+
+
+/* ==========================================
+   СОХРАНЕНИЕ РЕЗУЛЬТАТА РАУНДА
+========================================== */
+
+async function saveRoundResult(){
+
+    if(!pendingResult){
+
+        alert("Сначала выберите участника.");
+
+        return;
+    }
+
+
+    const slot =
+        document
+            .getElementById("resultSlotInput")
+            .value
+            .trim();
+
+
+    const cost =
+        Number(
+            document
+                .getElementById("resultCostInput")
+                .value
+        ) || 0;
+
+
+    const win =
+        Number(
+            document
+                .getElementById("resultWinInput")
+                .value
+        ) || 0;
+
+
+    if(!slot){
+
+        alert("Введите название слота.");
+
+        return;
+    }
+
+
+    if(cost <= 0){
+
+        alert("Введите стоимость бонуса.");
+
+        return;
+    }
+
+
+    if(win < 0){
+
+        alert("Введите правильный выигрыш.");
+
+        return;
+    }
+
+
+    const x =
+        win / cost;
+
+
+    const result = {
+
+        player:{
+            id:pendingResult.player.id,
+            name:pendingResult.player.name
+        },
+
+        slot:slot,
+
+        cost:cost,
+
+        win:win,
+
+        x:x
+
+    };
+
+
+    const round =
+        pendingResult.round;
+
+
+    const matchIndex =
+        pendingResult.matchIndex;
+
+
+    /*
+       Сохраняем результат только в ТЕКУЩИЙ раунд.
+       Старые результаты других раундов не меняются.
+    */
+
+    if(round === "quarter"){
+
+        roundResults.quarter[matchIndex] = result;
+
+        quarterWinners[matchIndex] = {
+            id:pendingResult.player.id,
+            name:pendingResult.player.name
+        };
+
+
+        /*
+           Если победитель 1/4 изменился,
+           его старый полуфинальный результат больше
+           не относится к новой паре.
+        */
+
+        if(matchIndex < 2){
+
+            roundResults.semi[0] = null;
+            semiWinners[0] = null;
+
+        }else{
+
+            roundResults.semi[1] = null;
+            semiWinners[1] = null;
+
+        }
+
+
+        roundResults.final = null;
+        champion = null;
+
+    }
+
+
+    if(round === "semi"){
+
+        roundResults.semi[matchIndex] = result;
+
+        semiWinners[matchIndex] = {
+            id:pendingResult.player.id,
+            name:pendingResult.player.name
+        };
+
+
+        roundResults.final = null;
+        champion = null;
+
+    }
+
+
+    if(round === "final"){
+
+        roundResults.final = result;
+
+        champion = {
+            id:pendingResult.player.id,
+            name:pendingResult.player.name
+        };
+
+    }
+
+
+    pendingResult = null;
+
+
+    document
+        .getElementById("roundResultStatus")
+        .textContent =
+        "✅ Результат сохранён. Победитель прошёл дальше.";
+
+
+    document
+        .getElementById("roundResultPanel")
+        .classList.add("hidden");
 
 
     renderBracket();
@@ -1183,143 +1508,27 @@ function renderQuarterFinals(){
                 ${fighterHtml(
                     p1,
                     winner,
-                    `selectQuarter(${i},0)`
+                    "quarter",
+                    i
                 )}
 
                 ${fighterHtml(
                     p2,
                     winner,
-                    `selectQuarter(${i},1)`
+                    "quarter",
+                    i
                 )}
 
             </div>
 
+            ${resultHtml(
+                roundResults.quarter[i],
+                "Результат 1/4"
+            )}
+
         `;
 
     }
-
-}
-
-
-/* ==========================================
-   ВЫБОР ПОБЕДИТЕЛЯ 1/4
-========================================== */
-
-async function selectQuarter(matchIndex,playerIndex){
-
-    const p =
-        participants[matchIndex * 2 + playerIndex];
-
-    if(!p){
-        return;
-    }
-
-    pendingResult = {
-        round: "quarter",
-        matchIndex: matchIndex,
-        player: p
-    };
-
-    openRoundResult(
-        "1/4 ФИНАЛА",
-        p
-    );
-}
-function openRoundResult(roundName, player){
-
-    document
-        .getElementById("roundResultPanel")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("resultPlayerName")
-        .textContent = player.name;
-
-    document
-        .getElementById("resultRoundName")
-        .textContent = roundName;
-
-    document
-        .getElementById("resultPreviewName")
-        .textContent = player.name;
-
-    document
-        .getElementById("resultSlotInput")
-        .value = "";
-
-    document
-        .getElementById("resultCostInput")
-        .value = "";
-
-    document
-        .getElementById("resultWinInput")
-        .value = "";
-
-    document
-        .getElementById("resultX")
-        .textContent = "0.00X";
-
-    document
-        .getElementById("roundResultPanel")
-        .scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-        });
-}
-
-
-function calculateRoundX(){
-
-    const cost =
-        Number(
-            document.getElementById("resultCostInput").value
-        ) || 0;
-
-    const win =
-        Number(
-            document.getElementById("resultWinInput").value
-        ) || 0;
-
-    let x = 0;
-
-    if(cost > 0){
-        x = win / cost;
-    }
-
-    document
-        .getElementById("resultX")
-        .textContent =
-        x.toFixed(2) + "X";
-}
-    const p =
-        participants[matchIndex*2 + playerIndex];
-
-
-    quarterWinners[matchIndex] = p;
-
-
-    /*
-      Если меняем победителя,
-      следующие стадии сбрасываются.
-    */
-
-    if(matchIndex < 2){
-
-        semiWinners[0] = null;
-
-    }else{
-
-        semiWinners[1] = null;
-
-    }
-
-
-    champion = null;
-
-
-    renderBracket();
-
-     saveData();
 
 }
 
@@ -1365,21 +1574,28 @@ function renderSemiFinals(){
                 ${fighterHtml(
                     p1,
                     semiWinners[0],
-                    "selectSemi(0,0)"
+                    "semi",
+                    0
                 )}
 
                 ${fighterHtml(
                     p2,
                     semiWinners[0],
-                    "selectSemi(0,1)"
+                    "semi",
+                    0
                 )}
 
             </div>
 
+            ${resultHtml(
+                roundResults.semi[0],
+                "Результат 1/2"
+            )}
+
         `
 
         : `<div class="empty">
-            Ждём победителей
+            Ждём победителей 1/4
            </div>`;
 
 
@@ -1394,49 +1610,29 @@ function renderSemiFinals(){
                 ${fighterHtml(
                     p3,
                     semiWinners[1],
-                    "selectSemi(1,0)"
+                    "semi",
+                    1
                 )}
 
                 ${fighterHtml(
                     p4,
                     semiWinners[1],
-                    "selectSemi(1,1)"
+                    "semi",
+                    1
                 )}
 
             </div>
 
+            ${resultHtml(
+                roundResults.semi[1],
+                "Результат 1/2"
+            )}
+
         `
 
         : `<div class="empty">
-            Ждём победителей
+            Ждём победителей 1/4
            </div>`;
-
-}
-
-
-/* ==========================================
-   ВЫБОР ПОЛУФИНАЛА
-========================================== */
-
-async function selectSemi(matchIndex,playerIndex){
-
-    const p =
-        matchIndex === 0
-
-        ? quarterWinners[playerIndex]
-
-        : quarterWinners[playerIndex + 2];
-
-
-    semiWinners[matchIndex] = p;
-
-
-    champion = null;
-
-
-    renderBracket();
-
-    await saveData();
 
 }
 
@@ -1477,16 +1673,23 @@ function renderFinal(){
             ${fighterHtml(
                 p1,
                 champion,
-                "selectChampion(0)"
+                "final",
+                0
             )}
 
             ${fighterHtml(
                 p2,
                 champion,
-                "selectChampion(1)"
+                "final",
+                0
             )}
 
         </div>
+
+        ${resultHtml(
+            roundResults.final,
+            "Результат ФИНАЛА"
+        )}
 
     `;
 
@@ -1494,26 +1697,7 @@ function renderFinal(){
 
 
 /* ==========================================
-   ЧЕМПИОН
-========================================== */
-
-async function selectChampion(index){
-
-    champion =
-        index === 0
-        ? semiWinners[0]
-        : semiWinners[1];
-
-
-    renderBracket();
-
-    await saveData();
-
-}
-
-
-/* ==========================================
-   ПОКАЗ ЧЕМПИОНА
+   ОТОБРАЖЕНИЕ ЧЕМПИОНА
 ========================================== */
 
 function renderChampion(){
@@ -1522,7 +1706,11 @@ function renderChampion(){
         document.getElementById("championSide");
 
 
-    if(!champion){
+    const finalResult =
+        roundResults.final;
+
+
+    if(!champion || !finalResult){
 
         box.innerHTML =
             `<div class="empty">
@@ -1551,7 +1739,7 @@ function renderChampion(){
                 </span>
 
                 <span class="fighter-x">
-                    ${champion.x.toFixed(2)}X
+                    ${Number(finalResult.x).toFixed(2)}X
                 </span>
 
             </div>
@@ -1575,16 +1763,16 @@ function renderChampion(){
     document
         .getElementById("championX")
         .textContent =
-        champion.x.toFixed(2) + "X";
+        Number(finalResult.x).toFixed(2) + "X";
 
 }
 
 
 /* ==========================================
-   FIGHTER HTML
+   КАРТОЧКА УЧАСТНИКА
 ========================================== */
 
-function fighterHtml(player,winner,onclick){
+function fighterHtml(player,winner,round,matchIndex){
 
     if(!player){
 
@@ -1599,28 +1787,119 @@ function fighterHtml(player,winner,onclick){
 
     const selected =
         winner &&
-        winner.id === player.id
+        String(winner.id) === String(player.id)
         ? "selected"
         : "";
+
+
+    const result =
+        getResultForPlayer(
+            round,
+            matchIndex,
+            player
+        );
+
+
+    let resultText = "";
+
+
+    if(result){
+
+        resultText = `
+            <div style="
+                margin-top:7px;
+                padding-top:7px;
+                border-top:1px solid rgba(255,255,255,.08);
+                font-size:12px;
+                color:#bbb;
+            ">
+                🎰 ${escapeHtml(result.slot)}
+                <br>
+                💰 ${formatMoney(result.cost)}
+                → ${formatMoney(result.win)}
+                <br>
+                <strong style="color:var(--gold)">
+                    ${Number(result.x).toFixed(2)}X
+                </strong>
+            </div>
+        `;
+
+    }else if(selected){
+
+        resultText = `
+            <div style="
+                margin-top:6px;
+                font-size:12px;
+                color:#aaa;
+            ">
+                Результат раунда ещё не введён
+            </div>
+        `;
+
+    }
 
 
     return `
 
         <div
             class="fighter ${selected}"
-            onclick="${onclick}"
+            onclick="openRoundResult(
+                '${round}',
+                ${matchIndex},
+                participants.find(p => String(p.id) === '${String(player.id)}')
+            )"
         >
 
             <span class="fighter-name">
                 ${escapeHtml(player.name)}
             </span>
 
-            <span class="fighter-x">
-                ${player.x.toFixed(2)}X
-            </span>
+            ${resultText}
 
         </div>
 
+    `;
+
+}
+
+
+function resultHtml(result,title){
+
+    if(!result){
+
+        return `
+            <div class="status" style="font-size:12px;color:#777">
+                ${title}: результат ещё не введён
+            </div>
+        `;
+
+    }
+
+
+    return `
+        <div
+            class="status"
+            style="
+                text-align:left;
+                font-size:12px;
+                line-height:1.5;
+            "
+        >
+            <strong style="color:var(--pink)">
+                ${title}
+            </strong>
+            <br>
+            🎰 ${escapeHtml(result.slot)}
+            <br>
+            👤 ${escapeHtml(result.player.name)}
+            <br>
+            💰 ${formatMoney(result.cost)}
+            → ${formatMoney(result.win)}
+            <br>
+            <strong style="color:var(--gold)">
+                ${Number(result.x).toFixed(2)}X
+            </strong>
+        </div>
     `;
 
 }
@@ -1644,6 +1923,8 @@ async function saveData(){
 
         champion:champion,
 
+        roundResults:roundResults,
+
         updatedAt:new Date().toISOString()
 
     };
@@ -1659,8 +1940,8 @@ async function saveData(){
                 title:"Клубничка",
 
                 prize:
-                    champion
-                    ? String(champion.win)
+                    roundResults.final
+                    ? String(roundResults.final.win)
                     : "0",
 
                 data:state
@@ -1674,19 +1955,29 @@ async function saveData(){
 
     if(error){
 
-        status.textContent =
-            "❌ Ошибка сохранения: " +
-            error.message;
+        if(status){
+
+            status.textContent =
+                "❌ Ошибка сохранения: " +
+                error.message;
+
+        }
 
         console.error(error);
 
-        return;
+        return false;
 
     }
 
 
-    status.textContent =
-        "✅ Данные сохранены";
+    if(status){
+
+        status.textContent =
+            "✅ Данные сохранены";
+
+    }
+
+    return true;
 
 }
 
@@ -1708,6 +1999,12 @@ async function loadData(){
     if(error){
 
         console.error(error);
+
+        document
+            .getElementById("saveStatus")
+            .textContent =
+            "❌ Ошибка загрузки: " +
+            error.message;
 
         return;
 
@@ -1732,19 +2029,19 @@ async function loadData(){
         data.data;
 
 
- participants =
-    Array.isArray(state.participants)
-    ? state.participants.map(p => ({
-        ...p,
-        x: Number.isFinite(Number(p.x))
-            ? Number(p.x)
-            : (
-                Number(p.cost) > 0
-                    ? Number(p.win) / Number(p.cost)
-                    : 0
-            )
-    }))
-    : [];
+    participants =
+        Array.isArray(state.participants)
+        ? state.participants.map(p => ({
+
+            id:
+                p.id ??
+                (Date.now() + Math.random()),
+
+            name:
+                String(p.name ?? "")
+
+        }))
+        : [];
 
 
     tournamentStarted =
@@ -1752,25 +2049,95 @@ async function loadData(){
 
 
     quarterWinners =
-        state.quarterWinners ||
-        [null,null,null,null];
+        normalizeWinnerArray(
+            state.quarterWinners,
+            4
+        );
 
 
     semiWinners =
-        state.semiWinners ||
-        [null,null];
+        normalizeWinnerArray(
+            state.semiWinners,
+            2
+        );
 
 
     champion =
-        state.champion ||
-        null;
+        state.champion
+        ? {
+            id:state.champion.id,
+            name:String(state.champion.name ?? "")
+        }
+        : null;
+
+
+    const savedResults =
+        state.roundResults;
+
+
+    if(savedResults){
+
+        roundResults = {
+
+            quarter:
+                normalizeResults(
+                    savedResults.quarter,
+                    4
+                ),
+
+            semi:
+                normalizeResults(
+                    savedResults.semi,
+                    2
+                ),
+
+            final:
+                savedResults.final || null
+
+        };
+
+    }else{
+
+        /*
+           Старые данные до новой системы результатов.
+           Старые cost/win/x намеренно НЕ используются
+           как результаты раундов.
+        */
+
+        roundResults = {
+            quarter:[null,null,null,null],
+            semi:[null,null],
+            final:null
+        };
+
+    }
+
+
+    /*
+       На всякий случай убираем старые поля
+       из победителей старой версии и оставляем
+       только id + name.
+    */
+
+    quarterWinners =
+        quarterWinners.map(normalizeWinner);
+
+
+    semiWinners =
+        semiWinners.map(normalizeWinner);
+
+
+    champion =
+        normalizeWinner(champion);
 
 
     renderTable();
 
 
-    if(participants.length === 8 &&
-       !tournamentStarted){
+    if(
+        participants.length === 8 &&
+        !tournamentStarted
+    ){
 
         document
             .getElementById("startTournamentBox")
@@ -1794,6 +2161,114 @@ async function loadData(){
         .getElementById("saveStatus")
         .textContent =
         "✅ Данные загружены";
+
+}
+
+
+/* ==========================================
+   НОРМАЛИЗАЦИЯ СТАРЫХ ДАННЫХ
+========================================== */
+
+function normalizeWinner(value){
+
+    if(!value){
+        return null;
+    }
+
+
+    if(
+        typeof value === "object" &&
+        value.id !== undefined
+    ){
+
+        return {
+
+            id:value.id,
+
+            name:String(value.name ?? "")
+
+        };
+
+    }
+
+
+    return null;
+
+}
+
+
+function normalizeWinnerArray(value,length){
+
+    const arr =
+        Array.isArray(value)
+        ? value
+        : [];
+
+
+    return Array.from(
+        {length:length},
+        (_,i) =>
+            normalizeWinner(arr[i])
+    );
+
+}
+
+
+function normalizeResults(value,length){
+
+    const arr =
+        Array.isArray(value)
+        ? value
+        : [];
+
+
+    return Array.from(
+        {length:length},
+        (_,i) => {
+
+            const r = arr[i];
+
+
+            if(
+                !r ||
+                !r.player
+            ){
+
+                return null;
+
+            }
+
+
+            const cost =
+                Number(r.cost) || 0;
+
+
+            const win =
+                Number(r.win) || 0;
+
+
+            return {
+
+                player:{
+                    id:r.player.id,
+                    name:String(r.player.name ?? "")
+                },
+
+                slot:String(r.slot ?? ""),
+
+                cost:cost,
+
+                win:win,
+
+                x:
+                    cost > 0
+                    ? win / cost
+                    : 0
+
+            };
+
+        }
+    );
 
 }
 
@@ -1828,8 +2303,17 @@ function escapeHtml(text){
 
 async function checkSession(){
 
-    const {data} =
+    const {data,error} =
         await supabaseClient.auth.getSession();
+
+
+    if(error){
+
+        console.error(error);
+
+        return;
+
+    }
 
 
     if(data.session){
@@ -1857,3 +2341,4 @@ checkSession();
 
 </body>
 </html>
+
