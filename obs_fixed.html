@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍓 Клубничка — Турнир</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#08030a;color:#fff;font-family:Arial,Helvetica,sans-serif}
+body{background:radial-gradient(circle at 50% 0%,#30001e 0%,#10000d 48%,#050205 100%)}
+.wrap{width:100vw;height:100vh;padding:34px 44px;position:relative}
+.header{height:82px;display:flex;align-items:center;justify-content:center}
+.title{font-size:42px;font-weight:900;letter-spacing:1px;color:#fff;text-shadow:0 0 10px #ff0088,0 0 24px #ff0088}
+.grid{height:calc(100vh - 116px);display:grid;grid-template-columns:1.15fr 1fr 1fr .82fr;gap:22px;align-items:center}
+.stage{height:100%;display:flex;flex-direction:column;justify-content:space-around;min-width:0}
+.stage-title{text-align:center;color:#ff1591;font-size:25px;font-weight:900;text-shadow:0 0 12px #ff0088;margin-bottom:10px}
+.matches{display:flex;flex-direction:column;justify-content:space-around;height:100%;gap:16px}
+.match{border:1px solid #ff1591;border-radius:14px;padding:10px;background:rgba(18,7,20,.88);box-shadow:0 0 16px rgba(255,0,136,.16)}
+.fighter{border:1px solid #49354a;border-radius:10px;padding:10px 12px;background:#151017;margin:5px 0;min-height:74px;display:flex;flex-direction:column;justify-content:center;position:relative}
+.fighter.winner{border-color:#4cff35;background:rgba(17,48,17,.92);box-shadow:0 0 12px rgba(76,255,53,.24)}
+.fighter.pending{border-color:#6b526c}
+.name{font-size:20px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{font-size:13px;color:#bbaabc;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.x{font-size:18px;font-weight:900;color:#ffd52e;margin-top:4px}
+.badge{position:absolute;right:8px;top:7px;color:#4cff35;font-size:11px;font-weight:900}
+.summary{margin-top:8px;border-radius:9px;background:#100912;padding:8px 10px;text-align:center;font-size:13px;color:#e4d5e5}
+.summary strong{color:#4cff35}
+.wait{height:100%;display:flex;align-items:center;justify-content:center;color:#7e6d7e;font-size:14px;text-align:center;border:1px dashed #3d293d;border-radius:12px;padding:20px}
+.final-stage{justify-content:center}
+.champion{border:1px solid #4cff35;border-radius:15px;padding:18px;background:rgba(17,48,17,.8);box-shadow:0 0 25px rgba(76,255,53,.22);text-align:center}
+.champion .cup{font-size:34px}
+.champion .cn{font-size:28px;font-weight:900;color:#4cff35;margin-top:7px}
+.champion .cx{font-size:24px;font-weight:900;color:#ffd52e;margin-top:5px}
+.status{position:absolute;left:18px;bottom:12px;font-size:11px;color:#756375}
+.live{position:absolute;right:20px;top:18px;font-size:12px;color:#4cff35;font-weight:900;opacity:.85}
+@media(max-width:1200px){.wrap{padding:22px}.grid{gap:12px}.title{font-size:32px}.stage-title{font-size:19px}.name{font-size:16px}.fighter{min-height:60px;padding:7px 9px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="live">● LIVE</div>
+  <div class="header"><div class="title">🍓 КЛУБНИЧКА — ТУРНИР</div></div>
+  <div class="grid">
+    <section class="stage"><div class="stage-title">1/4 ФИНАЛА</div><div id="quarters" class="matches"></div></section>
+    <section class="stage"><div class="stage-title">1/2 ФИНАЛА</div><div id="semis" class="matches"></div></section>
+    <section class="stage final-stage"><div class="stage-title">ФИНАЛ</div><div id="final"></div></section>
+    <section class="stage final-stage"><div class="stage-title">🏆 ЧЕМПИОН</div><div id="champion"></div></section>
+  </div>
+  <div id="status" class="status">Подключение...</div>
+</div>
+<script>
+const SUPABASE_URL = "https://vfewetptlvauwxnskjew.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6mkpBEPtYcfXbPiuToSWcA_bd3dgFZw";
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let state = {participants:[],tournamentStarted:false,quarterWinners:[null,null,null,null],semiWinners:[null,null],champion:null,roundResults:{quarter:[null,null,null,null],semi:[null,null],final:null}};
+
+function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function money(v){const n=Number(v); return Number.isFinite(n)?n.toLocaleString('ru-RU'):'0'}
+function rx(r){return r&&Number.isFinite(Number(r.x))?Number(r.x):0}
+function resultFor(round,i,p){const m=state.roundResults?.[round]?.[i] ?? (round==='final'?state.roundResults?.final:null); if(!m||!p)return null; return (m.players||[]).find(r=>r&&r.player&&String(r.player.id)===String(p.id))||null}
+function winnerFor(round,i){const m=round==='final'?state.roundResults?.final:state.roundResults?.[round]?.[i]; return m?.winner||null}
+function fighter(p,r,i){
+ if(!p)return '<div class="fighter"><div class="name">—</div><div class="meta">Ожидаем участника</div></div>';
+ const res=resultFor(r,i,p), win=winnerFor(r,i), isWin=win&&String(win.id)===String(p.id);
+ return `<div class="fighter ${isWin?'winner':''}">${isWin?'<div class="badge">🏆 ПОБЕДИТЕЛЬ</div>':''}<div class="name">${esc(p.name)}</div>${res?`<div class="meta">🎰 ${esc(res.slot)} · 💰 ${money(res.cost)} ₽ → ${money(res.win)} ₽</div><div class="x">${rx(res).toFixed(2)}X</div>`:'<div class="meta">Результат ещё не введён</div>'}</div>`
+}
+function summary(round,i){const m=round==='final'?state.roundResults?.final:state.roundResults?.[round]?.[i]; if(!m)return ''; const a=m.players?.[0],b=m.players?.[1]; if(a&&b&&m.winner)return `<div class="summary"><strong>🏆 ${esc(m.winner.name)} проходит дальше</strong><br>${esc(a.player.name)} — ${rx(a).toFixed(2)}X · ${esc(b.player.name)} — ${rx(b).toFixed(2)}X</div>`; if(a||b)return `<div class="summary">Введён результат ${a?esc(a.player.name):esc(b.player.name)} · ждём второго участника</div>`; return ''}
+function render(){
+ const ps=state.participants||[], qw=state.quarterWinners||[null,null,null,null], sw=state.semiWinners||[null,null];
+ document.getElementById('quarters').innerHTML=Array.from({length:4},(_,i)=>{const a=ps[i*2],b=ps[i*2+1];return `<div><div class="match">${fighter(a,'quarter',i)}${fighter(b,'quarter',i)}</div>${summary('quarter',i)}</div>`}).join('');
+ document.getElementById('semis').innerHTML=Array.from({length:2},(_,i)=>{const a=qw[i*2],b=qw[i*2+1];return `<div><div class="match">${a&&b?fighter(a,'semi',i)+fighter(b,'semi',i):'<div class="wait">Ожидаем победителей 1/4</div>'}</div>${a&&b?summary('semi',i):''}</div>`}).join('');
+ const a=sw[0],b=sw[1]; document.getElementById('final').innerHTML=a&&b?`<div class="match">${fighter(a,'final',0)}${fighter(b,'final',0)}</div>${summary('final',0)}`:'<div class="wait">Ожидаем победителей полуфиналов</div>';
+ const ch=state.champion, fr=state.roundResults?.final; let cr=null; if(ch&&fr)cr=(fr.players||[]).find(r=>r&&r.player&&String(r.player.id)===String(ch.id)); document.getElementById('champion').innerHTML=ch&&cr?`<div class="champion"><div class="cup">🏆</div><div class="cn">${esc(ch.name)}</div><div class="cx">${rx(cr).toFixed(2)}X</div></div>`:'<div class="wait">Чемпион появится после финала</div>';
+}
+async function load(){const {data,error}=await client.from('tournaments').select('data').eq('id',1).maybeSingle(); if(!error&&data?.data){state={...state,...data.data}; render(); document.getElementById('status').textContent='Данные обновлены';} else if(error)document.getElementById('status').textContent='Ошибка подключения';}
+client.channel('tournament-live').on('postgres_changes',{event:'*',schema:'public',table:'tournaments',filter:'id=eq.1'},payload=>{if(payload.new?.data){state={...state,...payload.new.data};render();document.getElementById('status').textContent='LIVE · обновлено';}}).subscribe();
+load(); setInterval(load,2000);
+</script>
+</body>
+</html>
