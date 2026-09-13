@@ -507,7 +507,76 @@ button:disabled{
 
 
     <!-- СЕТКА -->
+<div id="roundResultPanel" class="panel hidden">
 
+    <h2>🎰 РЕЗУЛЬТАТ РАУНДА</h2>
+
+    <div class="status">
+        Участник:
+        <strong id="resultPlayerName">—</strong>
+    </div>
+
+    <div class="status">
+        Раунд:
+        <strong id="resultRoundName">—</strong>
+    </div>
+
+    <div class="add-grid">
+
+        <div>
+            <label>Название слота</label>
+            <input
+                id="resultSlotInput"
+                placeholder="Например: Sweet Bonanza"
+            >
+        </div>
+
+        <div>
+            <label>Стоимость бонуса, ₽</label>
+            <input
+                id="resultCostInput"
+                type="number"
+                min="0"
+                placeholder="5000"
+                oninput="calculateRoundX()"
+            >
+        </div>
+
+        <div>
+            <label>Выигрыш, ₽</label>
+            <input
+                id="resultWinInput"
+                type="number"
+                min="0"
+                placeholder="15000"
+                oninput="calculateRoundX()"
+            >
+        </div>
+
+    </div>
+
+    <div class="current-result">
+
+        <div>
+            <span>Участник</span>
+            <strong id="resultPreviewName">—</strong>
+        </div>
+
+        <div>
+            <span>X</span>
+            <strong id="resultX">0.00X</strong>
+        </div>
+
+    </div>
+
+    <button
+        class="btn"
+        onclick="saveRoundResult()"
+    >
+        💾 СОХРАНИТЬ РЕЗУЛЬТАТ
+    </button>
+
+</div>
     <div id="bracketPanel" class="panel hidden">
 
         <h2>🏆 ТУРНИРНАЯ СЕТКА</h2>
