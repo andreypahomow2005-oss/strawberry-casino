@@ -1205,8 +1205,92 @@ function renderQuarterFinals(){
    ВЫБОР ПОБЕДИТЕЛЯ 1/4
 ========================================== */
 
-async function selectQuarter(matchIndex,playerIndex){
+function selectQuarter(matchIndex, playerIndex){
 
+    const p =
+        participants[matchIndex * 2 + playerIndex];
+
+    if(!p){
+        return;
+    }
+
+    pendingResult = {
+        round: "quarter",
+        matchIndex: matchIndex,
+        player: p
+    };
+
+    openRoundResult(
+        "1/4 ФИНАЛА",
+        p
+    );
+}
+function openRoundResult(roundName, player){
+
+    document
+        .getElementById("roundResultPanel")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("resultPlayerName")
+        .textContent = player.name;
+
+    document
+        .getElementById("resultRoundName")
+        .textContent = roundName;
+
+    document
+        .getElementById("resultPreviewName")
+        .textContent = player.name;
+
+    document
+        .getElementById("resultSlotInput")
+        .value = "";
+
+    document
+        .getElementById("resultCostInput")
+        .value = "";
+
+    document
+        .getElementById("resultWinInput")
+        .value = "";
+
+    document
+        .getElementById("resultX")
+        .textContent = "0.00X";
+
+    document
+        .getElementById("roundResultPanel")
+        .scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+}
+
+
+function calculateRoundX(){
+
+    const cost =
+        Number(
+            document.getElementById("resultCostInput").value
+        ) || 0;
+
+    const win =
+        Number(
+            document.getElementById("resultWinInput").value
+        ) || 0;
+
+    let x = 0;
+
+    if(cost > 0){
+        x = win / cost;
+    }
+
+    document
+        .getElementById("resultX")
+        .textContent =
+        x.toFixed(2) + "X";
+}
     const p =
         participants[matchIndex*2 + playerIndex];
 
