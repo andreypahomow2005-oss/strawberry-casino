@@ -1297,6 +1297,27 @@ function openRoundResult(round, matchIndex, player){
 }
 
 
+function getOpponentForResult(round, matchIndex, playerId){
+    let players = [];
+
+    if(round === "quarter"){
+        players = [
+            participants[matchIndex * 2],
+            participants[matchIndex * 2 + 1]
+        ];
+    }else if(round === "semi"){
+        players = matchIndex === 0
+            ? [quarterWinners[0], quarterWinners[1]]
+            : [quarterWinners[2], quarterWinners[3]];
+    }else{
+        players = [semiWinners[0], semiWinners[1]];
+    }
+
+    return players.find(p =>
+        p && String(p.id) !== String(playerId)
+    ) || null;
+}
+
 function closeRoundResult(){
 
     pendingResult = null;
@@ -1373,6 +1394,7 @@ async function saveRoundResult(){
 
     const round = pendingResult.round;
     const matchIndex = pendingResult.matchIndex;
+    const pendingResultPlayerId = pendingResult.player.id;
 
     const container =
         ensureMatchResultContainer(round, matchIndex);
@@ -1479,7 +1501,18 @@ async function saveRoundResult(){
     renderBracket();
 
     if(justWonTournament && champion){
+        // Финал завершён — сразу показываем победителя поверх админки.
         showWinnerOverlay(champion);
+    }else if(!first || !second){
+        // Один участник пары уже введён.
+        // Автоматически открываем второго, чтобы оператору не пришлось
+        // искать его мышкой и прокручивать страницу вручную.
+        const opponent = getOpponentForResult(round, matchIndex, pendingResultPlayerId);
+        if(opponent){
+            setTimeout(() => {
+                openRoundResult(round, matchIndex, opponent);
+            }, 180);
+        }
     }
 
     await saveData();
