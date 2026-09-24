@@ -10,11 +10,18 @@
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#08030a;color:#fff;font-family:Arial,Helvetica,sans-serif}
 body{background:radial-gradient(circle at 50% 0%,#30001e 0%,#10000d 48%,#050205 100%)}
 .wrap{width:100vw;height:100vh;padding:34px 44px;position:relative}
-.header{height:82px;display:flex;align-items:center;justify-content:center}
+.header{height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
 .title{font-size:42px;font-weight:900;letter-spacing:1px;color:#fff;text-shadow:0 0 10px #ff0088,0 0 24px #ff0088}
+.winner-overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at 50% 42%,rgba(255,0,136,.22),rgba(8,3,10,.98) 65%);padding:40px}
+.winner-overlay.show{display:flex}
+.winner-card{width:min(1100px,90vw);padding:60px 50px;border:2px solid #ff1591;border-radius:30px;background:rgba(18,7,20,.94);box-shadow:0 0 45px rgba(255,0,136,.5),inset 0 0 40px rgba(255,0,136,.08)}
+.winner-cup{font-size:80px;line-height:1}
+.winner-title{margin-top:18px;font-size:32px;font-weight:900;color:#ff1591;text-shadow:0 0 18px #ff0088}
+.winner-name{margin-top:18px;font-size:64px;font-weight:900;color:#fff;text-shadow:0 0 15px #ff0088,0 0 35px #ff0088;word-break:break-word}
+.winner-prize{margin-top:18px;font-size:28px;font-weight:900;color:#ffd52e}
 .grid{height:calc(100vh - 116px);display:grid;grid-template-columns:1.15fr 1fr 1fr .82fr;gap:22px;align-items:center}
 .stage{height:100%;display:flex;flex-direction:column;justify-content:space-around;min-width:0}
-.stage-title{text-align:center;color:#ff1591;font-size:25px;font-weight:900;text-shadow:0 0 12px #ff0088;margin-bottom:10px}
+.stage-title{text-align:center;color:#ff1591;font-size:25px;font-weight:900;text-shadow:0 0 12px #ff0088;margin-bottom:10px}.stage-prize{margin-top:6px;font-size:15px;color:#ffd52e;text-shadow:0 0 8px #ff9d00}
 .matches{display:flex;flex-direction:column;justify-content:space-around;height:100%;gap:16px}
 .match{border:1px solid #ff1591;border-radius:14px;padding:10px;background:rgba(18,7,20,.88);box-shadow:0 0 16px rgba(255,0,136,.16)}
 .fighter{border:1px solid #49354a;border-radius:10px;padding:10px 12px;background:#151017;margin:5px 0;min-height:74px;display:flex;flex-direction:column;justify-content:center;position:relative}
@@ -42,13 +49,14 @@ body{background:radial-gradient(circle at 50% 0%,#30001e 0%,#10000d 48%,#050205 
   <div class="live">● LIVE</div>
   <div class="header"><div class="title">🍓 КЛУБНИЧКА — ТУРНИР</div></div>
   <div class="grid">
-    <section class="stage"><div class="stage-title">1/4 ФИНАЛА</div><div id="quarters" class="matches"></div></section>
-    <section class="stage"><div class="stage-title">1/2 ФИНАЛА</div><div id="semis" class="matches"></div></section>
-    <section class="stage final-stage"><div class="stage-title">ФИНАЛ</div><div id="final"></div></section>
+    <section class="stage"><div class="stage-title">1/4 ФИНАЛА<div class="stage-prize">🎁 БОНУС 3 000 ₽</div></div><div id="quarters" class="matches"></div></section>
+    <section class="stage"><div class="stage-title">1/2 ФИНАЛА<div class="stage-prize">🎁 БОНУС 5 000 ₽</div></div><div id="semis" class="matches"></div></section>
+    <section class="stage final-stage"><div class="stage-title">ФИНАЛ<div class="stage-prize">🎁 БОНУС 8 000 ₽</div></div><div id="final"></div></section>
     <section class="stage final-stage"><div class="stage-title">🏆 ЧЕМПИОН</div><div id="champion"></div></section>
   </div>
   <div id="status" class="status">Подключение...</div>
 </div>
+<div id="winnerOverlay" class="winner-overlay"><div class="winner-card"><div class="winner-cup">🏆</div><div class="winner-title">ПОБЕДИТЕЛЬ ТУРНИРА</div><div id="winnerName" class="winner-name">—</div><div id="winnerPrize" class="winner-prize">🎁 БОНУС 8 000 ₽</div></div></div>
 <script>
 const SUPABASE_URL = "https://vfewetptlvauwxnskjew.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6mkpBEPtYcfXbPiuToSWcA_bd3dgFZw";
@@ -67,11 +75,20 @@ function fighter(p,r,i){
 }
 function summary(round,i){const m=round==='final'?state.roundResults?.final:state.roundResults?.[round]?.[i]; if(!m)return ''; const a=m.players?.[0],b=m.players?.[1]; if(a&&b&&m.winner)return `<div class="summary"><strong>🏆 ${esc(m.winner.name)} проходит дальше</strong><br>${esc(a.player.name)} — ${rx(a).toFixed(2)}X · ${esc(b.player.name)} — ${rx(b).toFixed(2)}X</div>`; if(a||b)return `<div class="summary">Введён результат ${a?esc(a.player.name):esc(b.player.name)} · ждём второго участника</div>`; return ''}
 function render(){
- const ps=state.participants||[], qw=state.quarterWinners||[null,null,null,null], sw=state.semiWinners||[null,null];
- document.getElementById('quarters').innerHTML=Array.from({length:4},(_,i)=>{const a=ps[i*2],b=ps[i*2+1];return `<div><div class="match">${fighter(a,'quarter',i)}${fighter(b,'quarter',i)}</div>${summary('quarter',i)}</div>`}).join('');
- document.getElementById('semis').innerHTML=Array.from({length:2},(_,i)=>{const a=qw[i*2],b=qw[i*2+1];return `<div><div class="match">${a&&b?fighter(a,'semi',i)+fighter(b,'semi',i):'<div class="wait">Ожидаем победителей 1/4</div>'}</div>${a&&b?summary('semi',i):''}</div>`}).join('');
- const a=sw[0],b=sw[1]; document.getElementById('final').innerHTML=a&&b?`<div class="match">${fighter(a,'final',0)}${fighter(b,'final',0)}</div>${summary('final',0)}`:'<div class="wait">Ожидаем победителей полуфиналов</div>';
- const ch=state.champion, fr=state.roundResults?.final; let cr=null; if(ch&&fr)cr=(fr.players||[]).find(r=>r&&r.player&&String(r.player.id)===String(ch.id)); document.getElementById('champion').innerHTML=ch&&cr?`<div class="champion"><div class="cup">🏆</div><div class="cn">${esc(ch.name)}</div><div class="cx">${rx(cr).toFixed(2)}X</div></div>`:'<div class="wait">Чемпион появится после финала</div>';
+  const ps=state.participants||[], qw=state.quarterWinners||[null,null,null,null], sw=state.semiWinners||[null,null];
+  document.getElementById('quarters').innerHTML=Array.from({length:4},(_,i)=>{const a=ps[i*2],b=ps[i*2+1];return `<div><div class="match">${fighter(a,'quarter',i)}${fighter(b,'quarter',i)}</div>${summary('quarter',i)}</div>`}).join('');
+  document.getElementById('semis').innerHTML=Array.from({length:2},(_,i)=>{const a=qw[i*2],b=qw[i*2+1];return `<div><div class="match">${a&&b?fighter(a,'semi',i)+fighter(b,'semi',i):'<div class="wait">Ожидаем победителей 1/4</div>'}</div>${a&&b?summary('semi',i):''}</div>`}).join('');
+  const a=sw[0],b=sw[1]; document.getElementById('final').innerHTML=a&&b?`<div class="match">${fighter(a,'final',0)}${fighter(b,'final',0)}</div>${summary('final',0)}`:'<div class="wait">Ожидаем победителей полуфиналов</div>';
+  const ch=state.champion, fr=state.roundResults?.final; let cr=null; if(ch&&fr)cr=(fr.players||[]).find(r=>r&&r.player&&String(r.player.id)===String(ch.id)); document.getElementById('champion').innerHTML=ch&&cr?`<div class="champion"><div class="cup">🏆</div><div class="cn">${esc(ch.name)}</div><div class="cx">${rx(cr).toFixed(2)}X</div></div>`:'<div class="wait">Чемпион появится после финала</div>';
+
+  const overlay=document.getElementById('winnerOverlay');
+  if(ch){
+    document.getElementById('winnerName').textContent=ch.name;
+    document.getElementById('winnerPrize').textContent='🎁 БОНУС 8 000 ₽';
+    overlay.classList.add('show');
+  }else{
+    overlay.classList.remove('show');
+  }
 }
 async function load(){const {data,error}=await client.from('tournaments').select('data').eq('id',1).maybeSingle(); if(!error&&data?.data){state={...state,...data.data}; render(); document.getElementById('status').textContent='Данные обновлены';} else if(error)document.getElementById('status').textContent='Ошибка подключения';}
 client.channel('tournament-live').on('postgres_changes',{event:'*',schema:'public',table:'tournaments',filter:'id=eq.1'},payload=>{if(payload.new?.data){state={...state,...payload.new.data};render();document.getElementById('status').textContent='LIVE · обновлено';}}).subscribe();
