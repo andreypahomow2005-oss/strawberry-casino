@@ -486,7 +486,7 @@ button:disabled{
         <div class="winner-cup">🏆</div>
         <div class="winner-title">ПОБЕДИТЕЛЬ ТУРНИРА</div>
         <div id="adminWinnerName" class="winner-name">—</div>
-        <div id="adminWinnerPrize" class="winner-prize">🎁 БОНУС 8 000 ₽</div>
+        <div id="adminWinnerPrize" class="winner-prize">🎁 БОНУС ЗА 10 000 ₽</div>
         <button class="btn-pink winner-close" onclick="closeWinnerOverlay()">Продолжить</button>
     </div>
 </div>
@@ -1575,13 +1575,11 @@ function showWinnerOverlay(winner){
     document.getElementById("adminWinnerName").textContent =
         winner.name;
 
-    const plus = Number(winner.plus || winner.profit || 0);
-    const bonus = plus > 0 ? Math.min(10000, Math.floor(plus / 2)) : 5000;
-
-    document.getElementById("adminWinnerPrize").textContent =
-        plus > 0
-            ? `🎁 ВЫИГРАЛ БОНУС ${bonus.toLocaleString("ru-RU")} ₽ — ПОЛОВИНА ОТ ПЛЮСА`
-            : "🎁 УТЕШИТЕЛЬНЫЙ БОНУС 5 000 ₽";
+    // Финальный бонус не рассчитываем по результату последнего слота.
+    // На экране просто показываем условия турнира.
+    document.getElementById("adminWinnerPrize").innerHTML =
+        "🎁 ВЫИГРАЛ БОНУС 10 000 ₽ — 50% ОТ ЕГО ПЛЮСА<br>" +
+        "🎁 ЕСЛИ НИЧЕГО НЕ ДАСТ — УТЕШИТЕЛЬНЫЙ БОНУС 5 000 ₽";
 
     document.getElementById("winnerOverlay")
         .classList.add("show");
