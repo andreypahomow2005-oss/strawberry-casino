@@ -1208,12 +1208,17 @@ function openRoundResult(round, matchIndex, player){
 
     calculateRoundX();
 
-    document
-        .getElementById("roundResultPanel")
-        .scrollIntoView({
-            behavior:"smooth",
-            block:"center"
-        });
+    // Автоматически прокручиваем к форме результата,
+    // чтобы не приходилось искать её вручную.
+    setTimeout(() => {
+        const panel = document.getElementById("roundResultPanel");
+        if(panel){
+            panel.scrollIntoView({
+                behavior:"smooth",
+                block:"center"
+            });
+        }
+    }, 80);
 }
 
 
@@ -1937,4 +1942,3 @@ checkSession();
 
 </body>
 </html>
-
