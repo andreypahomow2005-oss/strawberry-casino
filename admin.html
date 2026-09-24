@@ -1316,33 +1316,63 @@ function openNextUnresolvedMatch(round){
         matches = [[semiWinners[0], semiWinners[1]]];
     }
 
-    // После завершения пары НЕ открываем форму автоматически.
-    // Просто прокручиваем страницу к следующему участнику,
-    // чтобы админ сам нажал на него и ввёл результат.
-    for(let i=0;i<matches.length;i++){
+    // Ищем первую пару, в которой ещё не введены оба результата.
+    // ВАЖНО: результаты хранятся в result.players[0] и result.players[1],
+    // а не в result.first/result.second.
+    for(let i = 0; i < matches.length; i++){
         const pair = matches[i];
         if(!pair[0] || !pair[1]) continue;
 
-        const results = roundResults[round] || {};
-        const result = results[i];
+        const result = getMatchResultContainer(round, i);
+        const firstResult = result && Array.isArray(result.players)
+            ? result.players[0]
+            : null;
+        const secondResult = result && Array.isArray(result.players)
+            ? result.players[1]
+            : null;
 
-        if(!result || !result.first || !result.second){
-            const nextPlayer = result && result.first
-                ? pair.find(p => p && String(p.id) !== String(result.first.id))
-                : pair[0];
-
-            if(nextPlayer){
-                scrollToFighter(round, i, nextPlayer);
-            }
-            return;
+        // Оба участника этой пары уже обработаны — идём к следующей паре.
+        if(firstResult && secondResult){
+            continue;
         }
+
+        // Если первый уже обработан — прокручиваем ко второму.
+        // Если ещё никто не обработан — прокручиваем к первому.
+        const nextPlayer = firstResult
+            ? pair.find(p => p && String(p.id) !== String(firstResult.player.id))
+            : pair[0];
+
+        if(nextPlayer){
+            scrollToFighter(round, i, nextPlayer);
+        }
+        return;
     }
 
-    // Если раунд полностью завершён — сразу ведём к следующему раунду.
-    if(round === "quarter" && quarterWinners.every(Boolean)){
-        scrollToFighter("semi", 0, quarterWinners[0]);
-    }else if(round === "semi" && semiWinners.every(Boolean)){
-        scrollToFighter("final", 0, semiWinners[0]);
+    // Переходим в следующий раунд ТОЛЬКО когда закрыты ВСЕ пары текущего раунда.
+    if(round === "quarter"){
+        const allQuarterComplete = roundResults.quarter.every(container =>
+            container &&
+            Array.isArray(container.players) &&
+            container.players[0] &&
+            container.players[1] &&
+            container.winner
+        );
+
+        if(allQuarterComplete){
+            scrollToFighter("semi", 0, quarterWinners[0]);
+        }
+    }else if(round === "semi"){
+        const allSemiComplete = roundResults.semi.every(container =>
+            container &&
+            Array.isArray(container.players) &&
+            container.players[0] &&
+            container.players[1] &&
+            container.winner
+        );
+
+        if(allSemiComplete){
+            scrollToFighter("final", 0, semiWinners[0]);
+        }
     }
 }
 
