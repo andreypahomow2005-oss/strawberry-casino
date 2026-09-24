@@ -1297,6 +1297,45 @@ function openRoundResult(round, matchIndex, player){
 }
 
 
+function openNextUnresolvedMatch(round){
+    let matches = [];
+
+    if(round === "quarter"){
+        matches = [
+            [participants[0], participants[1]],
+            [participants[2], participants[3]],
+            [participants[4], participants[5]],
+            [participants[6], participants[7]]
+        ];
+    }else if(round === "semi"){
+        matches = [
+            [quarterWinners[0], quarterWinners[1]],
+            [quarterWinners[2], quarterWinners[3]]
+        ];
+    }else{
+        matches = [[semiWinners[0], semiWinners[1]]];
+    }
+
+    for(let i=0;i<matches.length;i++){
+        const pair = matches[i];
+        if(!pair[0] || !pair[1]) continue;
+
+        const results = roundResults[round] || {};
+        const result = results[i];
+
+        if(!result || !result.first || !result.second){
+            const firstPlayer = result && result.first
+                ? pair.find(p => p && String(p.id) !== String(result.first.id))
+                : pair[0];
+
+            if(firstPlayer){
+                openRoundResult(round, i, firstPlayer);
+            }
+            return;
+        }
+    }
+}
+
 function getOpponentForResult(round, matchIndex, playerId){
     let players = [];
 
@@ -1504,15 +1543,15 @@ async function saveRoundResult(){
         // Финал завершён — сразу показываем победителя поверх админки.
         showWinnerOverlay(champion);
     }else if(!first || !second){
-        // Один участник пары уже введён.
-        // Автоматически открываем второго, чтобы оператору не пришлось
-        // искать его мышкой и прокручивать страницу вручную.
+        // После первого результата этой пары сразу открываем соперника.
         const opponent = getOpponentForResult(round, matchIndex, pendingResultPlayerId);
         if(opponent){
-            setTimeout(() => {
-                openRoundResult(round, matchIndex, opponent);
-            }, 180);
+            setTimeout(() => openRoundResult(round, matchIndex, opponent), 220);
         }
+    }else{
+        // Пара полностью закрыта — автоматически открываем следующую
+        // незавершённую пару этого раунда.
+        setTimeout(() => openNextUnresolvedMatch(round), 220);
     }
 
     await saveData();
@@ -1535,8 +1574,14 @@ function showWinnerOverlay(winner){
 
     document.getElementById("adminWinnerName").textContent =
         winner.name;
+
+    const plus = Number(winner.plus || winner.profit || 0);
+    const bonus = plus > 0 ? Math.min(10000, Math.floor(plus / 2)) : 5000;
+
     document.getElementById("adminWinnerPrize").textContent =
-        "🎁 БОНУС 8 000 ₽";
+        plus > 0
+            ? `🎁 ВЫИГРАЛ БОНУС ${bonus.toLocaleString("ru-RU")} ₽ — ПОЛОВИНА ОТ ПЛЮСА`
+            : "🎁 УТЕШИТЕЛЬНЫЙ БОНУС 5 000 ₽";
 
     document.getElementById("winnerOverlay")
         .classList.add("show");
