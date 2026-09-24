@@ -1298,43 +1298,64 @@ function openRoundResult(round, matchIndex, player){
 
 
 function openNextUnresolvedMatch(round){
-    let matches = [];
+    // Автоматический порядок турнира:
+    // 1/4 матч 1 -> 1/4 матч 2 -> 1/2 матч 1 ->
+    // 1/4 матч 3 -> 1/4 матч 4 -> 1/2 матч 2 -> финал.
+    // После каждого полностью завершённого матча открываем
+    // следующего доступного участника и прокручиваем к форме.
 
-    if(round === "quarter"){
-        matches = [
-            [participants[0], participants[1]],
-            [participants[2], participants[3]],
-            [participants[4], participants[5]],
-            [participants[6], participants[7]]
-        ];
-    }else if(round === "semi"){
-        matches = [
-            [quarterWinners[0], quarterWinners[1]],
-            [quarterWinners[2], quarterWinners[3]]
-        ];
-    }else{
-        matches = [[semiWinners[0], semiWinners[1]]];
-    }
+    const steps = [
+        {round:"quarter", matchIndex:0},
+        {round:"quarter", matchIndex:1},
+        {round:"semi",    matchIndex:0},
+        {round:"quarter", matchIndex:2},
+        {round:"quarter", matchIndex:3},
+        {round:"semi",    matchIndex:1},
+        {round:"final",   matchIndex:0}
+    ];
 
-    for(let i=0;i<matches.length;i++){
-        const pair = matches[i];
-        if(!pair[0] || !pair[1]) continue;
+    for(const step of steps){
+        const pair = getMatchPlayers(step.round, step.matchIndex);
+        if(!pair[0] || !pair[1]){
+            continue;
+        }
 
-        const results = roundResults[round] || {};
-        const result = results[i];
+        const container =
+            getMatchResultContainer(step.round, step.matchIndex);
 
-        if(!result || !result.first || !result.second){
-            const firstPlayer = result && result.first
-                ? pair.find(p => p && String(p.id) !== String(result.first.id))
-                : pair[0];
+        const players = container && Array.isArray(container.players)
+            ? container.players
+            : [null, null];
 
-            if(firstPlayer){
-                openRoundResult(round, i, firstPlayer);
+        // Пара ещё не завершена — открываем первого участника
+        // без результата, а если первый уже введён — второго.
+        if(!players[0] || !players[1]){
+            const nextPlayer = !players[0] ? pair[0] : pair[1];
+            if(nextPlayer){
+                openRoundResult(step.round, step.matchIndex, nextPlayer);
             }
             return;
         }
     }
 }
+
+function getMatchPlayers(round, matchIndex){
+    if(round === "quarter"){
+        return [
+            participants[matchIndex * 2],
+            participants[matchIndex * 2 + 1]
+        ];
+    }
+
+    if(round === "semi"){
+        return matchIndex === 0
+            ? [quarterWinners[0], quarterWinners[1]]
+            : [quarterWinners[2], quarterWinners[3]];
+    }
+
+    return [semiWinners[0], semiWinners[1]];
+}
+
 
 function getOpponentForResult(round, matchIndex, playerId){
     let players = [];
@@ -1549,8 +1570,10 @@ async function saveRoundResult(){
             setTimeout(() => openRoundResult(round, matchIndex, opponent), 220);
         }
     }else{
-        // Пара полностью закрыта — автоматически открываем следующую
-        // незавершённую пару этого раунда.
+        // Пара полностью закрыта — автоматически переходим
+        // к следующему доступному участнику по всей сетке.
+        // Благодаря этому после двух победителей 1/4 сразу
+        // открывается 1/2, а форма сама прокручивается к ней.
         setTimeout(() => openNextUnresolvedMatch(round), 220);
     }
 
