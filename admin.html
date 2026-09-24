@@ -1298,64 +1298,72 @@ function openRoundResult(round, matchIndex, player){
 
 
 function openNextUnresolvedMatch(round){
-    // Автоматический порядок турнира:
-    // 1/4 матч 1 -> 1/4 матч 2 -> 1/2 матч 1 ->
-    // 1/4 матч 3 -> 1/4 матч 4 -> 1/2 матч 2 -> финал.
-    // После каждого полностью завершённого матча открываем
-    // следующего доступного участника и прокручиваем к форме.
+    let matches = [];
 
-    const steps = [
-        {round:"quarter", matchIndex:0},
-        {round:"quarter", matchIndex:1},
-        {round:"semi",    matchIndex:0},
-        {round:"quarter", matchIndex:2},
-        {round:"quarter", matchIndex:3},
-        {round:"semi",    matchIndex:1},
-        {round:"final",   matchIndex:0}
-    ];
+    if(round === "quarter"){
+        matches = [
+            [participants[0], participants[1]],
+            [participants[2], participants[3]],
+            [participants[4], participants[5]],
+            [participants[6], participants[7]]
+        ];
+    }else if(round === "semi"){
+        matches = [
+            [quarterWinners[0], quarterWinners[1]],
+            [quarterWinners[2], quarterWinners[3]]
+        ];
+    }else{
+        matches = [[semiWinners[0], semiWinners[1]]];
+    }
 
-    for(const step of steps){
-        const pair = getMatchPlayers(step.round, step.matchIndex);
-        if(!pair[0] || !pair[1]){
-            continue;
-        }
+    // После завершения пары НЕ открываем форму автоматически.
+    // Просто прокручиваем страницу к следующему участнику,
+    // чтобы админ сам нажал на него и ввёл результат.
+    for(let i=0;i<matches.length;i++){
+        const pair = matches[i];
+        if(!pair[0] || !pair[1]) continue;
 
-        const container =
-            getMatchResultContainer(step.round, step.matchIndex);
+        const results = roundResults[round] || {};
+        const result = results[i];
 
-        const players = container && Array.isArray(container.players)
-            ? container.players
-            : [null, null];
+        if(!result || !result.first || !result.second){
+            const nextPlayer = result && result.first
+                ? pair.find(p => p && String(p.id) !== String(result.first.id))
+                : pair[0];
 
-        // Пара ещё не завершена — открываем первого участника
-        // без результата, а если первый уже введён — второго.
-        if(!players[0] || !players[1]){
-            const nextPlayer = !players[0] ? pair[0] : pair[1];
             if(nextPlayer){
-                openRoundResult(step.round, step.matchIndex, nextPlayer);
+                scrollToFighter(round, i, nextPlayer);
             }
             return;
         }
     }
+
+    // Если раунд полностью завершён — сразу ведём к следующему раунду.
+    if(round === "quarter" && quarterWinners.every(Boolean)){
+        scrollToFighter("semi", 0, quarterWinners[0]);
+    }else if(round === "semi" && semiWinners.every(Boolean)){
+        scrollToFighter("final", 0, semiWinners[0]);
+    }
 }
 
-function getMatchPlayers(round, matchIndex){
-    if(round === "quarter"){
-        return [
-            participants[matchIndex * 2],
-            participants[matchIndex * 2 + 1]
-        ];
+function scrollToFighter(round, matchIndex, player){
+    if(!player){
+        return;
     }
 
-    if(round === "semi"){
-        return matchIndex === 0
-            ? [quarterWinners[0], quarterWinners[1]]
-            : [quarterWinners[2], quarterWinners[3]];
-    }
+    const targetId =
+        `fighter-${round}-${matchIndex}-${encodeURIComponent(String(player.id))}`;
 
-    return [semiWinners[0], semiWinners[1]];
+    setTimeout(() => {
+        const fighter = document.getElementById(targetId);
+        if(fighter){
+            fighter.scrollIntoView({
+                behavior:"smooth",
+                block:"center"
+            });
+        }
+    }, 80);
 }
-
 
 function getOpponentForResult(round, matchIndex, playerId){
     let players = [];
@@ -1570,10 +1578,8 @@ async function saveRoundResult(){
             setTimeout(() => openRoundResult(round, matchIndex, opponent), 220);
         }
     }else{
-        // Пара полностью закрыта — автоматически переходим
-        // к следующему доступному участнику по всей сетке.
-        // Благодаря этому после двух победителей 1/4 сразу
-        // открывается 1/2, а форма сама прокручивается к ней.
+        // Пара полностью закрыта — автоматически открываем следующую
+        // незавершённую пару этого раунда.
         setTimeout(() => openNextUnresolvedMatch(round), 220);
     }
 
@@ -1866,6 +1872,7 @@ function fighterHtml(player, winner, round, matchIndex){
 
     return `
         <div
+            id="fighter-${round}-${matchIndex}-${encodeURIComponent(String(player.id))}"
             class="fighter ${selected}"
             onclick="openRoundResult('${round}',${matchIndex},participants.find(p => String(p.id) === '${String(player.id)}'))"
         >
