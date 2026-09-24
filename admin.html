@@ -145,6 +145,19 @@ button:disabled{
     background:#29222b;
 }
 
+.result-bonus-banner{
+    margin:14px 0 16px;
+    padding:12px 16px;
+    border:1px solid #ff1591;
+    border-radius:12px;
+    background:rgba(255,0,136,.10);
+    color:#ffd52e;
+    font-size:18px;
+    font-weight:900;
+    text-align:center;
+    text-shadow:0 0 10px rgba(255,157,0,.35);
+    box-shadow:0 0 16px rgba(255,0,136,.12);
+}
 .status{
     margin-top:12px;
     padding:12px;
@@ -540,6 +553,10 @@ button:disabled{
         <div class="status">
             Раунд:
             <strong id="resultRoundName">—</strong>
+        </div>
+
+        <div id="resultBonusBanner" class="result-bonus-banner">
+            🎁 БОНУС ЗА 3 000 ₽
         </div>
 
         <div class="add-grid">
@@ -1165,6 +1182,15 @@ function openRoundResult(round, matchIndex, player){
 
     document.getElementById("resultRoundName").textContent =
         getRoundLabel(round);
+
+    const bonusByRound = {
+        quarter: "🎁 БОНУС ЗА 3 000 ₽",
+        semi: "🎁 БОНУС ЗА 5 000 ₽",
+        final: "🎁 БОНУС ЗА 8 000 ₽"
+    };
+
+    document.getElementById("resultBonusBanner").textContent =
+        bonusByRound[round] || "🎁 БОНУС";
 
     document.getElementById("resultSlotInput").value =
         oldResult ? oldResult.slot : "";
@@ -1911,3 +1937,4 @@ checkSession();
 
 </body>
 </html>
+
