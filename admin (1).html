@@ -1,0 +1,2584 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍓 Клубничка — Админка</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+    --bg:#080409;
+    --panel:#140914;
+    --pink:#ff1685;
+    --red:#ff1744;
+    --gold:#ffd54a;
+    --green:#65ff4f;
+    --cyan:#00e5ff;
+    --text:#fff;
+    --muted:#aaa;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    font-family:Arial,sans-serif;
+    color:var(--text);
+    background:
+        radial-gradient(circle at 15% 10%,rgba(255,22,133,.20),transparent 30%),
+        radial-gradient(circle at 85% 80%,rgba(255,23,68,.14),transparent 30%),
+        var(--bg);
+}
+
+.container{
+    width:min(1250px,94%);
+    margin:25px auto 50px;
+}
+
+.logo{
+    text-align:center;
+    font-size:42px;
+    font-weight:900;
+    margin-bottom:25px;
+    text-shadow:
+        0 0 10px var(--pink),
+        0 0 30px var(--pink);
+}
+
+.panel{
+    background:rgba(20,9,20,.94);
+    border:1px solid rgba(255,22,133,.55);
+    border-radius:18px;
+    padding:24px;
+    margin-bottom:20px;
+    box-shadow:
+        0 0 20px rgba(255,22,133,.12),
+        inset 0 0 30px rgba(255,22,133,.025);
+}
+
+h2{
+    margin:0 0 20px;
+    color:var(--pink);
+    text-shadow:0 0 10px rgba(255,22,133,.5);
+}
+
+.login{
+    max-width:500px;
+    margin:100px auto;
+}
+
+input{
+    width:100%;
+    padding:14px 16px;
+    margin:6px 0;
+    border-radius:10px;
+    border:1px solid rgba(255,22,133,.5);
+    background:#0a060b;
+    color:white;
+    font-size:16px;
+    outline:none;
+}
+
+input:focus{
+    border-color:var(--pink);
+    box-shadow:0 0 12px rgba(255,22,133,.25);
+}
+
+.row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+label{
+    display:block;
+    margin-bottom:5px;
+    color:#ddd;
+    font-weight:bold;
+}
+
+button{
+    border:0;
+    border-radius:10px;
+    padding:13px 20px;
+    font-size:16px;
+    font-weight:900;
+    cursor:pointer;
+    transition:.2s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.12);
+}
+
+button:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+    transform:none;
+}
+
+.btn-pink{
+    color:#fff;
+    background:linear-gradient(135deg,#ff176f,#ff1685);
+    box-shadow:0 0 15px rgba(255,22,133,.3);
+}
+
+.btn-green{
+    color:#061006;
+    background:linear-gradient(135deg,#35c94c,#65ff4f);
+    box-shadow:0 0 15px rgba(101,255,79,.25);
+}
+
+.btn-red{
+    color:#fff;
+    background:linear-gradient(135deg,#ff1744,#c80035);
+}
+
+.btn-gray{
+    color:#fff;
+    background:#29222b;
+}
+
+.result-bonus-banner{
+    margin:14px 0 16px;
+    padding:12px 16px;
+    border:1px solid #ff1591;
+    border-radius:12px;
+    background:rgba(255,0,136,.10);
+    color:#ffd52e;
+    font-size:18px;
+    font-weight:900;
+    text-align:center;
+    text-shadow:0 0 10px rgba(255,157,0,.35);
+    box-shadow:0 0 16px rgba(255,0,136,.12);
+}
+.status{
+    margin-top:12px;
+    padding:12px;
+    border-radius:10px;
+    background:#0a060b;
+    color:#aaa;
+    text-align:center;
+}
+
+.counter{
+    text-align:center;
+    font-size:25px;
+    font-weight:900;
+    color:var(--gold);
+    margin-bottom:20px;
+}
+
+.current{
+    border:1px solid rgba(0,229,255,.5);
+    background:rgba(0,229,255,.04);
+    border-radius:15px;
+    padding:20px;
+    margin-top:20px;
+}
+
+.current-title{
+    color:var(--cyan);
+    font-weight:bold;
+    font-size:18px;
+    margin-bottom:10px;
+}
+
+.current-name{
+    font-size:32px;
+    font-weight:900;
+    margin-bottom:15px;
+}
+
+.xbox{
+    text-align:center;
+    padding:20px;
+    margin-top:15px;
+    border:1px solid rgba(255,213,74,.5);
+    border-radius:15px;
+    background:rgba(255,213,74,.04);
+}
+
+.xvalue{
+    font-size:58px;
+    font-weight:900;
+    color:var(--gold);
+    text-shadow:
+        0 0 10px var(--gold),
+        0 0 25px rgba(255,213,74,.5);
+}
+
+.add-grid{
+    display:grid;
+    grid-template-columns:1.4fr 1fr 1fr;
+    gap:12px;
+    align-items:end;
+}
+
+.participant-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+.participant-table th,
+.participant-table td{
+    padding:13px 10px;
+    border-bottom:1px solid rgba(255,22,133,.18);
+    text-align:left;
+}
+
+.participant-table th{
+    color:var(--pink);
+}
+
+.participant-table td:last-child{
+    text-align:right;
+}
+
+.x-small{
+    color:var(--gold);
+    font-size:20px;
+    font-weight:900;
+}
+
+.empty{
+    text-align:center;
+    color:#888;
+    padding:25px;
+}
+
+/* СЕТКА */
+
+.bracket{
+    overflow-x:auto;
+    padding:15px 5px 25px;
+}
+
+.bracket-grid{
+    min-width:1450px;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:35px;
+    align-items:center;
+}
+
+.round{
+    min-height:650px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-around;
+}
+
+.round-title{
+    text-align:center;
+    color:var(--pink);
+    font-weight:900;
+    font-size:20px;
+    margin-bottom:10px;
+}
+
+.match{
+    background:#0b060c;
+    border:1px solid rgba(255,22,133,.35);
+    border-radius:13px;
+    padding:8px;
+    box-shadow:0 0 10px rgba(255,22,133,.08);
+}
+
+.fighter{
+    padding:13px 12px;
+    margin:3px 0;
+    border-radius:8px;
+    background:#151015;
+    border:1px solid rgba(255,255,255,.07);
+    cursor:pointer;
+    transition:.2s;
+}
+
+.fighter:hover{
+    border-color:var(--pink);
+    box-shadow:0 0 10px rgba(255,22,133,.25);
+}
+
+.fighter.selected{
+    background:rgba(101,255,79,.12);
+    border-color:var(--green);
+    color:var(--green);
+}
+
+.fighter.disabled{
+    cursor:default;
+    opacity:.45;
+}
+
+.fighter-name{
+    font-weight:900;
+}
+
+.fighter-x{
+    float:right;
+    color:var(--gold);
+    font-weight:900;
+}
+
+.final-box{
+    margin-top:25px;
+    text-align:center;
+    padding:30px;
+    border:2px solid var(--gold);
+    border-radius:18px;
+    background:rgba(255,213,74,.04);
+    display:none;
+}
+
+.final-title{
+    color:var(--gold);
+    font-size:22px;
+    font-weight:900;
+}
+
+.champion{
+    font-size:50px;
+    font-weight:900;
+    margin:15px 0;
+    text-shadow:0 0 20px var(--gold);
+}
+
+
+
+.slot-picker{
+    margin:14px 0;
+    padding:16px;
+    border:1px solid rgba(255,22,133,.45);
+    border-radius:14px;
+    background:linear-gradient(135deg,rgba(255,22,133,.08),rgba(101,255,79,.04));
+    text-align:center;
+}
+.slot-picker-title{
+    color:var(--pink);
+    font-weight:900;
+    font-size:18px;
+    margin-bottom:10px;
+}
+.slot-reel-wrap{
+    position:relative;
+    width:100%;
+    overflow:hidden;
+    border-radius:16px;
+    border:2px solid rgba(255,213,74,.45);
+    background:#08040a;
+    box-shadow:0 0 28px rgba(255,22,133,.18);
+    padding:18px 0;
+}
+.slot-reel-wrap::before,
+.slot-reel-wrap::after{
+    content:"";
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:18%;
+    z-index:3;
+    pointer-events:none;
+}
+.slot-reel-wrap::before{
+    left:0;
+    background:linear-gradient(90deg,#08040a,transparent);
+}
+.slot-reel-wrap::after{
+    right:0;
+    background:linear-gradient(270deg,#08040a,transparent);
+}
+.slot-reel-marker{
+    position:absolute;
+    z-index:4;
+    left:50%;
+    top:8px;
+    bottom:8px;
+    width:3px;
+    transform:translateX(-50%);
+    background:var(--gold);
+    box-shadow:0 0 16px rgba(255,213,74,.9);
+    border-radius:999px;
+    pointer-events:none;
+}
+.slot-reel-marker::before,
+.slot-reel-marker::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    border-left:8px solid transparent;
+    border-right:8px solid transparent;
+}
+.slot-reel-marker::before{
+    top:-2px;
+    border-top:10px solid var(--gold);
+}
+.slot-reel-marker::after{
+    bottom:-2px;
+    border-bottom:10px solid var(--gold);
+}
+.slot-reel{
+    display:flex;
+    flex-direction:row;
+    flex-wrap:nowrap;
+    gap:12px;
+    align-items:stretch;
+    width:max-content;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+}
+.slot-reel-item{
+    flex:0 0 150px;
+    width:150px;
+    overflow:hidden;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.12);
+    background:#100a12;
+    opacity:.78;
+    transform:scale(.92);
+    transition:opacity .35s, transform .35s, border-color .35s, box-shadow .35s;
+}
+.slot-image-box{
+    position:relative;
+    width:150px;
+    height:92px;
+    background:linear-gradient(135deg,#ff1685,#25102d 55%,#ffd54a);
+    overflow:hidden;
+}
+.slot-reel-item img{
+    position:relative;
+    z-index:2;
+    display:block;
+    width:150px;
+    height:92px;
+    object-fit:cover;
+    background:transparent;
+}
+.slot-img-fallback{
+    display:none!important;
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:34px;
+    background:linear-gradient(135deg,#ff1685,#25102d 55%,#ffd54a);
+}
+.slot-reel-item .slot-card-name{
+    padding:7px 7px 2px;
+    color:#fff;
+    font-size:12px;
+    line-height:1.15;
+    font-weight:900;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.slot-reel-item .slot-card-provider{
+    padding:2px 7px 8px;
+    color:#999;
+    font-size:9px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.slot-reel-item.is-center{
+    opacity:1;
+    transform:scale(1.04);
+    border-color:rgba(255,213,74,.85);
+    box-shadow:0 0 24px rgba(255,213,74,.28);
+}
+.slot-reel-item.is-final{
+    border-color:rgba(255,22,133,.95);
+    box-shadow:0 0 32px rgba(255,22,133,.55), 0 0 12px rgba(255,213,74,.45);
+}
+.slot-reel-empty{
+    min-height:150px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#777;
+    font-size:15px;
+    width:100%;
+}
+.result-line{
+    margin-top:7px;
+    padding-top:7px;
+    border-top:1px solid rgba(255,255,255,.08);
+    font-size:12px;
+    line-height:1.45;
+    color:#bbb;
+}
+
+.result-line strong{
+    color:var(--gold);
+}
+
+.winner-badge{
+    display:inline-block;
+    margin-top:7px;
+    padding:4px 8px;
+    border-radius:999px;
+    background:rgba(101,255,79,.12);
+    border:1px solid rgba(101,255,79,.45);
+    color:var(--green);
+    font-size:11px;
+    font-weight:900;
+}
+
+.need-result{
+    margin-top:7px;
+    font-size:12px;
+    color:#777;
+}
+
+.winner-overlay{
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(3,0,5,.94);
+    backdrop-filter:blur(6px);
+}
+.winner-overlay.show{
+    display:flex;
+}
+.confetti-canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+}
+.winner-card{
+    position:relative;
+    z-index:2;
+    width:min(900px,90vw);
+    padding:55px 35px;
+    text-align:center;
+    border:3px solid var(--gold);
+    border-radius:30px;
+    background:linear-gradient(145deg,#160b18,#09050b);
+    box-shadow:0 0 45px rgba(255,213,74,.35),0 0 100px rgba(255,22,133,.2);
+    animation:winnerPop .55s ease-out;
+}
+.winner-cup{
+    font-size:90px;
+    margin-bottom:10px;
+}
+.winner-title{
+    font-size:clamp(28px,5vw,58px);
+    font-weight:900;
+    color:var(--gold);
+    text-shadow:0 0 20px rgba(255,213,74,.7);
+}
+.winner-name{
+    margin:20px 0;
+    font-size:clamp(38px,7vw,84px);
+    font-weight:900;
+    color:#fff;
+    text-shadow:0 0 25px var(--pink);
+    word-break:break-word;
+}
+.winner-prize{
+    font-size:clamp(20px,3vw,32px);
+    font-weight:900;
+    color:var(--pink);
+}
+.winner-close{
+    margin-top:28px;
+}
+@keyframes winnerPop{
+    from{transform:scale(.75);opacity:0}
+    to{transform:scale(1);opacity:1}
+}
+
+.hidden{
+    display:none!important;
+}
+
+@media(max-width:800px){
+    .row,
+    .add-grid{
+        grid-template-columns:1fr;
+    }
+
+    .logo{
+        font-size:30px;
+    }
+}
+
+
+.current-result{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    margin-top:15px;
+}
+@media(max-width:800px){
+    .current-result{
+        grid-template-columns:1fr;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ПОБЕДИТЕЛЬ -->
+<div id="winnerOverlay" class="winner-overlay">
+    <canvas id="adminConfettiCanvas" class="confetti-canvas"></canvas>
+    <div class="winner-card">
+        <div class="winner-cup">🏆</div>
+        <div class="winner-title">ПОБЕДИТЕЛЬ ТУРНИРА</div>
+        <div id="adminWinnerName" class="winner-name">—</div>
+        <div id="adminWinnerPrize" class="winner-prize">🎁 БОНУС ЗА 10 000 ₽</div>
+        <button class="btn-pink winner-close" onclick="closeWinnerOverlay()">Продолжить</button>
+    </div>
+</div>
+
+<!-- ВХОД -->
+
+<div id="loginScreen" class="container login">
+
+    <div class="logo">🍓 КЛУБНИЧКА</div>
+
+    <div class="panel">
+
+        <h2>🔐 Вход администратора</h2>
+
+        <input id="email" type="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Пароль">
+
+        <button
+            class="btn-pink"
+            style="width:100%;margin-top:10px"
+            onclick="login()"
+        >
+            Войти
+        </button>
+
+        <div id="loginStatus" class="status"></div>
+
+    </div>
+
+</div>
+
+
+<!-- АДМИНКА -->
+
+<div id="adminScreen" class="container hidden">
+
+    <div class="logo">
+        🍓 КЛУБНИЧКА — АДМИНКА
+    </div>
+
+
+    <!-- ДОБАВЛЕНИЕ 16 УЧАСТНИКОВ -->
+
+    <div class="panel">
+
+        <h2>👤 Добавить участника</h2>
+
+        <div class="counter">
+            Участников: <span id="count">0</span> / 16
+        </div>
+
+        <div class="row">
+
+            <div>
+                <label>Имя участника</label>
+                <input
+                    id="nameInput"
+                    placeholder="Например: Макс"
+                    oninput="updateCurrentName()"
+                >
+            </div>
+
+            <div>
+                <button
+                    id="addButton"
+                    class="btn-pink"
+                    style="width:100%;margin-top:6px"
+                    onclick="addParticipant()"
+                >
+                    ➕ ДОБАВИТЬ
+                </button>
+            </div>
+
+        </div>
+
+        <div class="current">
+
+            <div class="current-title">
+                👤 Новый участник
+            </div>
+
+            <div id="currentName" class="current-name">
+                —
+            </div>
+
+            <div class="status">
+                В первые 16 участников записывается только имя.
+                Результаты, слот, стоимость, выигрыш и X вводятся отдельно в каждом раунде.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ТАБЛИЦА -->
+
+    <div class="panel">
+
+        <h2>📋 Участники турнира</h2>
+
+        <div id="tableContainer"></div>
+
+    </div>
+
+
+    <!-- ЗАПУСК ТУРНИРА -->
+
+    <div id="startTournamentBox" class="panel hidden">
+
+        <h2>🔥 Все 16 участников готовы!</h2>
+
+        <p style="color:#bbb">
+            Все участники записаны. Теперь можно начать турнир.
+        </p>
+
+        <button
+            class="btn-green"
+            style="width:100%;font-size:20px"
+            onclick="startTournament()"
+        >
+            🏆 НАЧАТЬ ТУРНИР
+        </button>
+
+    </div>
+
+
+    <!-- РЕЗУЛЬТАТ РАУНДА -->
+
+    <div id="roundResultPanel" class="panel hidden">
+
+        <h2>🎰 РЕЗУЛЬТАТ РАУНДА</h2>
+
+        <div class="status">
+            Участник:
+            <strong id="resultPlayerName">—</strong>
+        </div>
+
+        <div class="status">
+            Раунд:
+            <strong id="resultRoundName">—</strong>
+        </div>
+
+        <div id="resultBonusBanner" class="result-bonus-banner">
+            🎁 БОНУС ЗА 3 000 ₽
+        </div>
+
+        <div id="slotPicker" class="slot-picker">
+            <div class="slot-picker-title" id="slotPickerTitle">🎰 ВЫБОР СЛОТА</div>
+            <div id="slotCard" class="slot-card">
+                <div style="padding:28px;color:#777">Готовим слот...</div>
+            </div>
+            <button type="button" id="startSlotBtn" class="btn-pink"
+                    style="width:100%;margin-top:12px;font-size:18px"
+                    onclick="startManualSlotSpin()">
+                🎰 СТАРТ
+            </button>
+            <div id="slotSpinHint" style="text-align:center;color:#aaa;margin-top:8px">
+                Нажмите «СТАРТ», чтобы выбрать слот
+            </div>
+        </div>
+
+        <div class="add-grid">
+
+            <div>
+                <label>Название слота</label>
+                <input
+                    id="resultSlotInput"
+                    placeholder="Слот выберется автоматически"
+                    readonly
+                >
+            </div>
+
+            <div>
+                <label>Стоимость бонуса, ₽</label>
+                <input
+                    id="resultCostInput"
+                    type="number"
+                    min="0"
+                    placeholder="5000"
+                    oninput="calculateRoundX()"
+                >
+            </div>
+
+            <div>
+                <label>Выигрыш, ₽</label>
+                <input
+                    id="resultWinInput"
+                    type="number"
+                    min="0"
+                    placeholder="15000"
+                    oninput="calculateRoundX()"
+                >
+            </div>
+
+        </div>
+
+        <div class="current">
+
+            <div class="current-title">
+                📊 Результат
+            </div>
+
+            <div class="current-name" id="resultPreviewName">
+                —
+            </div>
+
+            <div class="status">
+                <span>Множитель:</span>
+                <strong id="resultX" class="x-small">0.00X</strong>
+            </div>
+
+        </div>
+
+        <button
+            class="btn-green"
+            style="width:100%;margin-top:15px"
+            onclick="saveRoundResult()"
+        >
+            💾 СОХРАНИТЬ РЕЗУЛЬТАТ И ПРОВЕСТИ ДАЛЬШЕ
+        </button>
+
+        <button
+            class="btn-gray"
+            style="width:100%;margin-top:10px"
+            onclick="closeRoundResult()"
+        >
+            Отмена
+        </button>
+
+        <div id="roundResultStatus" class="status"></div>
+
+    </div>
+
+
+    <!-- СЕТКА -->
+
+    <div id="bracketPanel" class="panel hidden">
+
+        <h2>🏆 ТУРНИРНАЯ СЕТКА</h2>
+
+        <div class="status">
+            Нажми на участника — слот автоматически прокрутится и закрепится за ним. Затем введи его результат. После сохранения победитель проходит дальше.
+        </div>
+
+        <div class="bracket">
+
+            <div class="bracket-grid">
+
+                <div class="round">
+                    <div class="round-title">1/8 ФИНАЛА</div>
+                    <div id="r16m1"></div>
+                    <div id="r16m2"></div>
+                    <div id="r16m3"></div>
+                    <div id="r16m4"></div>
+                    <div id="r16m5"></div>
+                    <div id="r16m6"></div>
+                    <div id="r16m7"></div>
+                    <div id="r16m8"></div>
+                </div>
+
+                <div class="round">
+                    <div class="round-title">1/4 ФИНАЛА</div>
+                    <div id="qf1"></div>
+                    <div id="qf2"></div>
+                    <div id="qf3"></div>
+                    <div id="qf4"></div>
+                </div>
+
+                <div class="round">
+                    <div class="round-title">1/2 ФИНАЛА</div>
+                    <div id="sf1"></div>
+                    <div id="sf2"></div>
+                </div>
+
+                <div class="round">
+                    <div class="round-title">ФИНАЛ</div>
+                    <div id="finalMatch"></div>
+                </div>
+
+                <div class="round">
+                    <div class="round-title">🏆 ЧЕМПИОН</div>
+                    <div id="championSide"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div id="championBox" class="final-box">
+
+            <div class="final-title">
+                🏆 ПОБЕДИТЕЛЬ ТУРНИРА 🏆
+            </div>
+
+            <div id="championName" class="champion">
+                —
+            </div>
+
+            <div id="championX" class="x-small">
+                0.00X
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <button
+            class="btn-gray"
+            onclick="saveData()"
+            style="width:100%"
+        >
+            💾 СОХРАНИТЬ ДАННЫЕ
+        </button>
+
+        <div id="saveStatus" class="status">
+            Данные загружаются...
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ==========================================
+   SUPABASE
+========================================== */
+
+const SUPABASE_URL =
+    "https://vfewetptlvauwxnskjew.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_6mkpBEPtYcfXbPiuToSWcA_bd3dgFZw";
+
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+/* ==========================================
+   СОСТОЯНИЕ
+========================================== */
+
+let participants = [];
+
+let tournamentStarted = false;
+
+let round16Winners = Array(8).fill(null);
+let quarterWinners = Array(4).fill(null);
+let semiWinners = Array(2).fill(null);
+let champion = null;
+
+/* Каждый матч хранит ДВА отдельных результата. */
+let roundResults = {
+    round16: Array(8).fill(null),
+    quarter: Array(4).fill(null),
+    semi: Array(2).fill(null),
+    final: null
+};
+
+/* Один слот на одного участника. Слот не повторяется. */
+let slotAssignments = {};
+
+let pendingResult = null;
+
+
+/* ==========================================
+   ВХОД
+========================================== */
+
+async function login(){
+
+    const email =
+        document.getElementById("email").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    const status =
+        document.getElementById("loginStatus");
+
+    if(!email || !password){
+        status.textContent = "Введите email и пароль.";
+        return;
+    }
+
+    status.textContent = "Выполняем вход...";
+
+    const {error} =
+        await supabaseClient.auth.signInWithPassword({
+            email:email,
+            password:password
+        });
+
+    if(error){
+        status.textContent = "Ошибка: " + error.message;
+        return;
+    }
+
+    document
+        .getElementById("loginScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("adminScreen")
+        .classList.remove("hidden");
+
+    await loadData();
+}
+
+
+/* ==========================================
+   ИМЯ НОВОГО УЧАСТНИКА
+========================================== */
+
+function updateCurrentName(){
+
+    const name =
+        document.getElementById("nameInput").value.trim();
+
+    document.getElementById("currentName").textContent =
+        name || "—";
+}
+
+
+/* ==========================================
+   ДОБАВЛЕНИЕ УЧАСТНИКА
+========================================== */
+
+async function addParticipant(){
+
+    if(tournamentStarted){
+        alert("Чтобы изменить состав после старта, сначала удалите участника. Турнир будет сброшен.");
+        return;
+    }
+
+    if(participants.length >= 16){
+        alert("Уже добавлено 16 участников.");
+        return;
+    }
+
+    const name =
+        document.getElementById("nameInput").value.trim();
+
+    if(!name){
+        alert("Введите имя участника.");
+        return;
+    }
+
+    participants.push({
+        id:Date.now() + Math.random(),
+        name:name
+    });
+
+    document.getElementById("nameInput").value = "";
+    document.getElementById("currentName").textContent = "—";
+
+    renderTable();
+    await saveData();
+
+    if(participants.length === 16){
+        const startBox = document.getElementById("startTournamentBox");
+        startBox.classList.remove("hidden");
+
+        // Когда введён 16-й участник — сразу показываем кнопку старта.
+        setTimeout(() => {
+            startBox.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        }, 120);
+    }
+}
+
+
+/* ==========================================
+   ТАБЛИЦА
+========================================== */
+
+function renderTable(){
+
+    document.getElementById("count").textContent =
+        participants.length;
+
+    const container =
+        document.getElementById("tableContainer");
+
+    if(participants.length === 0){
+        container.innerHTML =
+            '<div class="empty">Пока нет участников</div>';
+        return;
+    }
+
+    container.innerHTML = `
+        <table class="participant-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Участник</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                ${participants.map((p,index)=>`
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><b>${escapeHtml(p.name)}</b></td>
+                        <td>
+                            <button
+                                class="btn-red"
+                                onclick="removeParticipant(${index})"
+                            >
+                                Удалить
+                            </button>
+                        </td>
+                    </tr>
+                `).join("")}
+            </tbody>
+        </table>
+    `;
+}
+
+
+/* ==========================================
+   УДАЛЕНИЕ УЧАСТНИКА
+========================================== */
+
+async function removeParticipant(index){
+
+    const p = participants[index];
+
+    if(!p){
+        return;
+    }
+
+    if(tournamentStarted){
+
+        const ok = confirm(
+            `Удалить участника «${p.name}»?\n\nПосле удаления текущая сетка будет сброшена, а оставшихся участников можно будет заново собрать в турнир.`
+        );
+
+        if(!ok){
+            return;
+        }
+
+        tournamentStarted = false;
+        resetBracketState();
+
+    }else{
+
+        const ok = confirm(
+            `Удалить участника «${p.name}»?`
+        );
+
+        if(!ok){
+            return;
+        }
+    }
+
+    participants.splice(index,1);
+
+    renderTable();
+
+    document
+        .getElementById("bracketPanel")
+        .classList.add("hidden");
+
+    document
+        .getElementById("startTournamentBox")
+        .classList.toggle("hidden", participants.length !== 16);
+
+    await saveData();
+}
+
+
+/* ==========================================
+   СБРОС СОСТОЯНИЯ СЕТКИ
+========================================== */
+
+function resetBracketState(){
+
+    round16Winners = Array(8).fill(null);
+    quarterWinners = Array(4).fill(null);
+    semiWinners = Array(2).fill(null);
+    champion = null;
+
+    roundResults = {
+        round16: Array(8).fill(null),
+        quarter: Array(4).fill(null),
+        semi: Array(2).fill(null),
+        final: null
+    };
+
+    slotAssignments = {};
+    // Новый турнир/круг: возвращаем все слоты в общий пул.
+    usedSlotIds = new Set();
+    pendingResult = null;
+
+    closeRoundResult();
+}
+
+
+/* ==========================================
+   НАЧАЛО ТУРНИРА
+========================================== */
+
+async function startTournament(){
+
+    if(participants.length !== 16){
+        alert("Нужно ровно 16 участников.");
+        return;
+    }
+
+    tournamentStarted = true;
+    resetBracketState();
+
+    document
+        .getElementById("startTournamentBox")
+        .classList.add("hidden");
+
+    document
+        .getElementById("bracketPanel")
+        .classList.remove("hidden");
+
+    renderBracket();
+
+    // После старта автоматически показываем турнир, без ручной прокрутки.
+    setTimeout(() => {
+        const bracketPanel = document.getElementById("bracketPanel");
+        if (bracketPanel) {
+            bracketPanel.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+    }, 50);
+
+    await saveData();
+}
+
+
+/* ==========================================
+   РЕЗУЛЬТАТЫ РАУНДОВ
+========================================== */
+
+function getRoundLabel(round){
+    if(round === "round16") return "1/8 ФИНАЛА";
+    if(round === "quarter") return "1/4 ФИНАЛА";
+    if(round === "semi") return "1/2 ФИНАЛА";
+    return "ФИНАЛ";
+}
+
+function getRoundArray(round){
+    if(round === "round16") return roundResults.round16;
+    if(round === "quarter") return roundResults.quarter;
+    if(round === "semi") return roundResults.semi;
+    return [roundResults.final];
+}
+
+function getMatchResultContainer(round, matchIndex){
+    const arr = getRoundArray(round);
+    return arr[matchIndex] || null;
+}
+
+function ensureMatchResultContainer(round, matchIndex){
+    const arr = getRoundArray(round);
+    let container = arr[matchIndex];
+    if(container) return container;
+    container = {players:[null,null], winner:null};
+    if(round === "final") roundResults.final = container;
+    else arr[matchIndex] = container;
+    return container;
+}
+
+function getRoundPlayers(round, matchIndex){
+    if(round === "round16") return [participants[matchIndex*2], participants[matchIndex*2+1]];
+    if(round === "quarter") return [round16Winners[matchIndex*2], round16Winners[matchIndex*2+1]];
+    if(round === "semi") return [quarterWinners[matchIndex*2], quarterWinners[matchIndex*2+1]];
+    return [semiWinners[0], semiWinners[1]];
+}
+
+function getPlayerSlot(round, matchIndex, player){
+    const players = getRoundPlayers(round, matchIndex);
+    return players[0] && String(players[0].id) === String(player.id) ? 0 : 1;
+}
+
+function getPlayerResult(round, matchIndex, player){
+
+    const container =
+        getMatchResultContainer(round, matchIndex);
+
+    if(!container || !Array.isArray(container.players)){
+        return null;
+    }
+
+    const slot = getPlayerSlot(round, matchIndex, player);
+    const result = container.players[slot];
+
+    if(
+        result &&
+        result.player &&
+        String(result.player.id) === String(player.id)
+    ){
+        return result;
+    }
+
+    return null;
+}
+
+function getWinner(round, matchIndex){
+
+    const container =
+        getMatchResultContainer(round, matchIndex);
+
+    return container && container.winner
+        ? container.winner
+        : null;
+}
+
+
+const SLOT_POOL = [
+    {id:"book-of-dead",name:"Book of Dead",provider:"Play'n GO",image:"https://www.primeapi.com/cmscdn/cdn/cms/PSL/book_of_dead_slot_05dfcaa260.jpg"},
+    {id:"rise-of-merlin",name:"Rise of Merlin",provider:"Play'n GO",image:"https://www.x3000.lv/cdn-cgi/image/width%3D800%2Cquality%3D85%2Cblur%3D0%2Cformat%3Dwebp/https%3A/cdn.sanity.io/images/ol1w6ddr/paf-prod/16677fb38e1decaae5cbbec427a1297859f445aa-1080x1080.jpg?q=100"},
+    {id:"le-bandit",name:"Le Bandit",provider:"Hacksaw Gaming",image:"https://nl.onecasino.com/img/screenshots/lebandit_100132_1_1000x660.jpg"},
+    {id:"hand-of-anubis",name:"Hand of Anubis",provider:"Hacksaw Gaming",image:"https://assets.midnite.com/cms/QR_Ql_UJLY_60b656e28f.png"},
+    {id:"wanted-dead-or-a-wild",name:"Wanted Dead or a Wild",provider:"Hacksaw Gaming",image:"https://meneercasino.com/sites/default/files/styles/content_width_960_/public/2026-03/Wanted%20Dead%20or%20a%20Wild%20VS%20multiplier.jpg.webp?itok=f8MUaFCh"},
+    {id:"book-of-shadows",name:"Book of Shadows",provider:"Nolimit City",image:"https://static.vegasexpert.com.ua/pict/1005222/book-of-shadows-adjustable-rows.png?imageDataId=1062982&timestamp=1731326064000"},
+    {id:"fire-in-the-hole-2",name:"Fire in the Hole 2",provider:"Nolimit City",image:"https://media.21.co.uk/images/games/fire-in-the-hole-2/fire-in-the-hole-2-square-auth.jpg"},
+    {id:"mental",name:"Mental",provider:"Nolimit City",image:"https://games.evolution.com/wp-content/uploads/2023/05/s-600x840mental.png"},
+    {id:"dead-or-alive-2",name:"Dead or Alive 2",provider:"NetEnt",image:"https://www.slotstemple.com/img/new_game_article_images/dead-or-alive-2.jpg"},
+    {id:"gonzos-quest",name:"Gonzo's Quest",provider:"NetEnt",image:"https://casino.guide/media/gonzos-quest-video-slot.jpg"},
+    {id:"razor-returns",name:"Razor Returns",provider:"Push Gaming",image:"https://www.playcasino.com/img/razor-returns-slot-1.jpg"},
+    {id:"razor-shark",name:"Razor Shark",provider:"Push Gaming",image:"https://www.bwin.com/en/blog/cdn/img/a7kFdN6C2WVg85CoKEkCVxeuGRkBLuRXDUAzCiej.png?fm=png&h=506&q=80&w=900"},
+    {id:"sugar-rush",name:"Sugar Rush",provider:"Pragmatic Play",image:"https://www.playcasino.com/img/sugar-rush-1.jpg"},
+    {id:"big-bass-bonanza",name:"Big Bass Bonanza",provider:"Pragmatic Play",image:"https://www.partycasino.es/es/blog/cdn/img/54117710-dcf6-4bd1-9e46-c94667bfffe3/WS7TCZEkNmGUrzqvdeM2SGb6nEAG5OjkogtzYQOQ.jpg?fm=jpeg&h=551&q=80&w=900"},
+    {id:"gates-of-olympus",name:"Gates of Olympus",provider:"Pragmatic Play",image:"https://img.netbet.com.mx/gms/games/mobile_casino_new/preview/15214-gates-of-olympus.jpg"},
+    {id:"starlight-princess",name:"Starlight Princess",provider:"Pragmatic Play",image:"https://hideousslots.com/wp-content/uploads/2021/08/princess-base.png.webp"},
+    {id:"wolf-gold",name:"Wolf Gold",provider:"Pragmatic Play",image:"https://aws.die-spielbank.de/sachsen/images/en/wolf-gold_die-spielbank_600x600.webp"},
+
+    {id:"le-bunny",name:"Le Bunny",provider:"Hacksaw Gaming",image:"https://images.sigma.world/le-bunny-base-game.png"},
+    {id:"le-zeus",name:"Le Zeus",provider:"Hacksaw Gaming",image:"https://www.slotark.com/images/slots/le-zeus-2.jpg"},
+    {id:"gator-hunters",name:"Gator Hunters",provider:"Nolimit City",image:"https://slotcatalog.com/userfiles/image/games/Nolimit-City/43225/gator-hunters-7095467.webp"},
+    {id:"mummys-jewels",name:"Mummy's Jewels",provider:"Pragmatic Play",image:"https://content.hollywoodbets.net/Mummys_Jewels_2391fb9d5c.webp"},
+    {id:"seamen",name:"Seamen",provider:"Nolimit City",image:"https://www.ultimateslots.com/wp-content/uploads/2026/03/seamen.png"},
+    {id:"rich-wilde-tome",name:"Rich Wilde and the Tome of Madness",provider:"Play'n GO",image:"https://assets.rizk.rs/cdn-cgi/image/format%3Dauto%2Cwidth%3Dauto%2Cheight%3Dauto%2Cquality%3D85%2Cfit%3Dcover/game-assets/desktop-original/15535.jpg"},
+    {id:"magic-piggy-og",name:"Magic Piggy OG",provider:"Hacksaw Gaming",image:"https://assets.slotslaunch.com/108462/magic-piggy-og.jpg"},
+    {id:"duel-at-dawn",name:"Duel at Dawn",provider:"Hacksaw Gaming",image:"https://mediumrare.imgix.net/bdff3ebf4d04f586ecab90203923fa65b39626ef03359106209089e0c8b1d0d3?q=85"},
+    {id:"sun-princess",name:"Sun Princess",provider:"Hacksaw Gaming",image:"https://acebet.co/_next/image?q=75&url=%2Fassets%2Fthumbnails%2Fhacksaw-gaming%2Fhsg_sunprincess94.webp&w=3840"},
+    {id:"big-bass-floats-my-boat",name:"Big Bass Floats My Boat",provider:"Pragmatic Play",image:"https://mediatrix.imgix.net/uploads/20e63088-5a7a-4111-b865-25c869bc448c.png?auto=format%2Ccompress"},
+    {id:"vampy-party",name:"Vampy Party",provider:"Pragmatic Play",image:"https://content.hollywoodbets.net/medium_Vampy_Party_Game_Tile_1000x600_Game_Tile_48_6779deb13f.webp"},
+    {id:"fruit-party-2",name:"Fruit Party 2",provider:"Pragmatic Play",image:"https://gambling.com/cdn-cgi/image/w%3D640%2Ch%3D480%2Cformat%3Dwebp/https%3A/objects.kaxmedia.com/auto/o/113312/f5543bbf8a.webp"},
+    {id:"afk-airport-security",name:"AFK Airport Security",provider:"Nolimit City",image:"https://fan-cdn.nolimitcity.com/Website_Icon_AFK_d294ef0970.jpg"},
+    {id:"fury-of-anubis",name:"Fury of Anubis",provider:"Pragmatic Play",image:"https://rollbit.com/game-images/pragmaticexternal_FuryofAnubis.webp"},
+    {id:"gates-of-hades",name:"Gates of Hades",provider:"Pragmatic Play",image:"https://images.prismic.io/betwright/aQDXs7pReVYa3wfU_GatesofHadesIcon.webp?auto=format%2Ccompress&h=500&rect=0%2C0%2C500%2C500&w=500"},
+    {id:"rip-city",name:"RIP City",provider:"Hacksaw Gaming",image:"https://cdn-cms.razed.com/game-assets/razed/hcw/rip-city.jpg"},
+    {id:"le-fisherman",name:"Le Fisherman",provider:"Hacksaw Gaming",image:"https://assets.aboutslots.com/uploads/assets/le_fisherman_hacksaw_gaming_slot_banner_c8d123c7f3.jpg"},
+    {id:"sweet-bonanza",name:"Sweet Bonanza",provider:"Pragmatic Play",image:"https://cdn.sweetbonanzaci.com/og-image.png"},
+    {id:"san-quentin",name:"San Quentin",provider:"Nolimit City",image:"https://mediumrare.imgix.net/ca243d6c3db42259d6859b80717eb378eb64e41a9d1b1f7fdeadde68d59d9ad5?q=85"}
+];
+
+let usedSlotIds = new Set();
+
+function getAssignedSlot(player){
+    if(!player) return null;
+    const id = String(slotAssignments[String(player.id)] || "");
+    return SLOT_POOL.find(s=>s.id===id) || null;
+}
+
+function syncUsedSlots(){
+    const occupied = new Set(Array.from(usedSlotIds || []).map(String));
+    Object.values(slotAssignments || {}).forEach(id => { if(id) occupied.add(String(id)); });
+    const containers = [
+        ...(roundResults.round16 || []),
+        ...(roundResults.quarter || []),
+        ...(roundResults.semi || []),
+        ...(roundResults.final ? [roundResults.final] : [])
+    ];
+    containers.forEach(container => {
+        (container?.players || []).forEach(result => {
+            if(!result?.slot) return;
+            const found = SLOT_POOL.find(s => s.name === result.slot);
+            if(found) occupied.add(String(found.id));
+        });
+    });
+    usedSlotIds = occupied;
+    return occupied;
+}
+
+function chooseUnusedSlot(){
+    const occupied = syncUsedSlots();
+    const available = SLOT_POOL.filter(s => !occupied.has(String(s.id)));
+    if(!available.length) return null;
+    return available[Math.floor(Math.random() * available.length)];
+}
+
+function renderSlotCard(slot, rolling=false){
+    const card=document.getElementById("slotCard");
+    if(!card) return;
+
+    if(!slot){
+        card.innerHTML='<div class="slot-reel-wrap"><div class="slot-reel-empty">🎰 Нажмите «СТАРТ», чтобы запустить выбор слота</div></div>';
+        return;
+    }
+
+    card.innerHTML=`
+        <div class="slot-reel-wrap">
+            <div class="slot-reel-marker"></div>
+            <div class="slot-reel" id="slotReel">
+                <div class="slot-reel-item is-center is-final">
+                    <div class="slot-image-box">
+                        <img src="${slot.image}" alt="${escapeHtml(slot.name)}"
+                             onerror="this.style.display='none'">
+                        <div class="slot-img-fallback">🎰</div>
+                    </div>
+                    <div class="slot-card-name">${escapeHtml(slot.name)}</div>
+                    <div class="slot-card-provider">${escapeHtml(slot.provider)}</div>
+                </div>
+            </div>
+        </div>`;
+}
+let slotRollToken=0;
+
+function startManualSlotSpin(){
+    if(!pendingResult || !pendingResult.player){
+        alert("Сначала выберите участника.");
+        return;
+    }
+
+    const player = pendingResult.player;
+    const oldResult = getPlayerResult(
+        pendingResult.round,
+        pendingResult.matchIndex,
+        player
+    );
+
+    if(oldResult && oldResult.slot){
+        const savedSlot = SLOT_POOL.find(s => s.name === oldResult.slot);
+        renderSlotCard(savedSlot || getAssignedSlot(player), false);
+        const input=document.getElementById("resultSlotInput");
+        if(input) input.value=oldResult.slot;
+        return;
+    }
+
+    const finalSlot = chooseUnusedSlot();
+    if(!finalSlot){
+        renderSlotCard(null,false);
+        alert("Свободных слотов больше нет.");
+        return;
+    }
+
+    const btn=document.getElementById("startSlotBtn");
+    const hint=document.getElementById("slotSpinHint");
+    if(btn) btn.disabled=true;
+    if(hint) hint.textContent="🎰 КРУТИМ СЛОТ...";
+
+    const occupied = syncUsedSlots();
+    const available=SLOT_POOL.filter(s=>!occupied.has(String(s.id)));
+    const reel=document.getElementById("slotCard");
+    if(!reel) return;
+
+    // ВАЖНО: в ленте каждый слот встречается только один раз.
+    // Никаких повторов подряд и никаких троек одного и того же слота.
+    // Длинная лента: все карточки разные, финальный слот встречается ровно один раз.
+    // После него оставляем ещё несколько карточек, чтобы справа никогда не было пустоты.
+    const shuffled = [...available].sort(() => Math.random() - 0.5);
+    const sequence = shuffled.slice(0, Math.min(48, shuffled.length));
+    const existingFinalIndex = sequence.findIndex(s => s.id === finalSlot.id);
+    if(existingFinalIndex >= 0) sequence.splice(existingFinalIndex, 1);
+
+    const tailCount = Math.min(3, Math.max(1, sequence.length - 1));
+    const finalIndex = Math.max(0, sequence.length - tailCount);
+    sequence.splice(finalIndex, 0, finalSlot);
+
+    reel.innerHTML=`
+        <div class="slot-reel-wrap">
+            <div class="slot-reel-marker"></div>
+            <div class="slot-reel" id="slotReel">
+                ${sequence.map((s,i)=>`
+                    <div class="slot-reel-item ${i===0?'is-center':''}" data-index="${i}">
+                        <div class="slot-image-box">
+                            <img src="${s.image}" alt="${escapeHtml(s.name)}"
+                                 onerror="this.style.display='none'">
+                            <div class="slot-img-fallback">🎰</div>
+                        </div>
+                        <div class="slot-card-name">${escapeHtml(s.name)}</div>
+                        <div class="slot-card-provider">${escapeHtml(s.provider)}</div>
+                    </div>
+                `).join("")}
+            </div>
+        </div>`;
+
+    const track=document.getElementById("slotReel");
+    const wrap=track ? track.parentElement : null;
+    if(!track || !wrap) return;
+
+    const itemWidth=162; // 150px + 12px gap
+    const itemCenter=75;
+    const duration=12500;
+    const startTime=performance.now();
+    const startX=0;
+
+    // Цель: выбранная карточка окажется ровно под золотым маркером.
+    const targetX = (wrap.clientWidth/2) - (finalIndex*itemWidth + itemCenter);
+
+    // Очень плавное ускорение -> долгое движение -> мягкое торможение.
+    function easeOutQuart(t){
+        return 1-Math.pow(1-t,4);
+    }
+
+    function animate(now){
+        const t=Math.min(1,(now-startTime)/duration);
+        const e=easeOutQuart(t);
+        const x=startX + (targetX-startX)*e;
+
+        track.style.transform=`translate3d(${x}px,0,0)`;
+
+        const items=track.querySelectorAll(".slot-reel-item");
+        const centerX=wrap.clientWidth/2;
+        items.forEach((item,i)=>{
+            const itemCenterX=x+i*itemWidth+itemCenter;
+            const distance=Math.abs(itemCenterX-centerX);
+            item.classList.toggle("is-center", distance<86);
+        });
+
+        if(t<1){
+            requestAnimationFrame(animate);
+            return;
+        }
+
+        // Финал: слот зафиксирован под маркером.
+        track.style.transform=`translate3d(${targetX}px,0,0)`;
+
+        const finalEl=track.querySelector(`[data-index="${finalIndex}"]`);
+        if(finalEl){
+            finalEl.classList.add("is-final");
+            finalEl.classList.add("is-center");
+        }
+
+        usedSlotIds.add(finalSlot.id);
+        slotAssignments[String(player.id)] = finalSlot.id;
+
+        const input=document.getElementById("resultSlotInput");
+        if(input) input.value=finalSlot.name;
+
+        if(btn) btn.disabled=false;
+        if(hint) hint.textContent="✅ Слот выбран. В следующих раундах этому участнику выпадет новый слот.";
+
+        saveData();
+        calculateRoundX();
+
+        setTimeout(() => {
+            const fields = document.getElementById("resultCostInput") ||
+                           document.getElementById("resultSlotInput");
+            if(fields){
+                fields.scrollIntoView({ behavior:"smooth", block:"center" });
+            }
+        }, 180);
+    }
+
+    requestAnimationFrame(animate);
+}
+function openRoundResult(round, matchIndex, player){
+
+    if(!player){
+        return;
+    }
+
+    pendingResult = {
+        round:round,
+        matchIndex:matchIndex,
+        player:{
+            id:player.id,
+            name:player.name
+        }
+    };
+
+    const oldResult =
+        getPlayerResult(round, matchIndex, player);
+
+    document
+        .getElementById("roundResultPanel")
+        .classList.remove("hidden");
+
+    document.getElementById("resultPlayerName").textContent =
+        player.name;
+
+    document.getElementById("resultPreviewName").textContent =
+        player.name;
+
+    document.getElementById("resultRoundName").textContent =
+        getRoundLabel(round);
+
+    const bonusByRound = {
+        round16: "🎁 БОНУС ЗА 3 000 ₽",
+        quarter: "🎁 БОНУС ЗА 5 000 ₽",
+        semi: "🎁 БОНУС ЗА 8 000 ₽",
+        final: "🏆 ФИНАЛ — РЕШАЮЩИЙ РАУНД"
+    };
+
+    document.getElementById("resultBonusBanner").textContent =
+        bonusByRound[round] || "🎁 БОНУС";
+
+    document.getElementById("resultSlotInput").value =
+        oldResult ? oldResult.slot : (getAssignedSlot(player)?.name || "");
+
+    document.getElementById("resultCostInput").value =
+        oldResult ? oldResult.cost : "";
+
+    document.getElementById("resultWinInput").value =
+        oldResult ? oldResult.win : "";
+
+    document.getElementById("roundResultStatus").textContent =
+        oldResult
+            ? "Можно изменить результат этого участника."
+            : "Введите результат этого участника. Он сохранится отдельно от соперника.";
+
+    // Слот НЕ крутится автоматически.
+    // Новый слот выбирается только после нажатия кнопки «СТАРТ».
+    if(oldResult && oldResult.slot){
+        const savedSlot = SLOT_POOL.find(s => s.name === oldResult.slot);
+        if(savedSlot) renderSlotCard(savedSlot, false);
+        const btn = document.getElementById("startSlotBtn");
+        const hint = document.getElementById("slotSpinHint");
+        if(btn) btn.disabled = false;
+        if(hint) hint.textContent = "Результат уже сохранён.";
+    } else {
+        renderSlotCard(null, false);
+        const btn = document.getElementById("startSlotBtn");
+        const hint = document.getElementById("slotSpinHint");
+        if(btn) btn.disabled = false;
+        if(hint) hint.textContent = "Нажмите «СТАРТ», чтобы выбрать слот";
+    }
+    calculateRoundX();
+
+    // Автоматически прокручиваем к форме результата,
+    // чтобы не приходилось искать её вручную.
+    setTimeout(() => {
+        const panel = document.getElementById("roundResultPanel");
+        if(panel){
+            panel.scrollIntoView({
+                behavior:"smooth",
+                block:"center"
+            });
+        }
+    }, 80);
+}
+
+
+function openNextUnresolvedMatch(round){
+    const counts = {round16:8, quarter:4, semi:2, final:1};
+    const matches = counts[round] || 0;
+
+    for(let i=0;i<matches;i++){
+        const pair = getRoundPlayers(round,i);
+        if(!pair[0] || !pair[1]) continue;
+        const result = getMatchResultContainer(round,i);
+        const players = result && Array.isArray(result.players) ? result.players : [null,null];
+        if(players[0] && players[1]) continue;
+
+        const nextPlayer = players[0]
+            ? pair.find(p => p && String(p.id) !== String(players[0].player.id))
+            : pair[0];
+        if(nextPlayer){
+            scrollToFighter(round,i,nextPlayer);
+        }
+        return;
+    }
+
+    const allComplete = getRoundArray(round).every(container =>
+        container && container.players && container.players[0] && container.players[1] && container.winner
+    );
+
+    if(!allComplete) return;
+
+    if(round === "round16") scrollToFighter("quarter",0,round16Winners[0]);
+    else if(round === "quarter") scrollToFighter("semi",0,quarterWinners[0]);
+    else if(round === "semi") scrollToFighter("final",0,semiWinners[0]);
+}
+
+function scrollToFighter(round, matchIndex, player){
+    if(!player){
+        return;
+    }
+
+    const targetId =
+        `fighter-${round}-${matchIndex}-${encodeURIComponent(String(player.id))}`;
+
+    setTimeout(() => {
+        const fighter = document.getElementById(targetId);
+        if(fighter){
+            fighter.scrollIntoView({
+                behavior:"smooth",
+                block:"center"
+            });
+        }
+    }, 80);
+}
+
+function getOpponentForResult(round, matchIndex, playerId){
+    const players = getRoundPlayers(round,matchIndex);
+    return players.find(p => p && String(p.id) !== String(playerId)) || null;
+}
+
+function closeRoundResult(){
+
+    pendingResult = null;
+
+    const panel =
+        document.getElementById("roundResultPanel");
+
+    if(panel){
+        panel.classList.add("hidden");
+    }
+}
+
+
+function calculateRoundX(){
+
+    const cost =
+        Number(document.getElementById("resultCostInput").value) || 0;
+
+    const win =
+        Number(document.getElementById("resultWinInput").value) || 0;
+
+    const x = cost > 0 ? win / cost : 0;
+
+    document.getElementById("resultX").textContent =
+        x.toFixed(2) + "X";
+}
+
+
+/* ==========================================
+   СОХРАНЕНИЕ РЕЗУЛЬТАТА
+========================================== */
+
+async function saveRoundResult(){
+
+    if(!pendingResult){
+        alert("Сначала выберите участника.");
+        return;
+    }
+
+    const slot =
+        document.getElementById("resultSlotInput").value.trim() ||
+        (getAssignedSlot(pendingResult.player)?.name || "");
+
+    const cost =
+        Number(document.getElementById("resultCostInput").value) || 0;
+
+    const win =
+        Number(document.getElementById("resultWinInput").value) || 0;
+
+    if(!slot){
+        alert("Введите название слота.");
+        return;
+    }
+
+    if(cost <= 0){
+        alert("Введите стоимость бонуса.");
+        return;
+    }
+
+    if(win < 0){
+        alert("Введите правильный выигрыш.");
+        return;
+    }
+
+    const result = {
+        player:{
+            id:pendingResult.player.id,
+            name:pendingResult.player.name
+        },
+        slot:slot,
+        cost:cost,
+        win:win,
+        x:win / cost
+    };
+
+    const selectedSlotObj = SLOT_POOL.find(s => s.name === slot);
+    if(selectedSlotObj){
+        usedSlotIds.add(selectedSlotObj.id);
+        slotAssignments[String(pendingResult.player.id)] = selectedSlotObj.id;
+    }
+
+    const round = pendingResult.round;
+    const matchIndex = pendingResult.matchIndex;
+    const pendingResultPlayerId = pendingResult.player.id;
+
+    const container =
+        ensureMatchResultContainer(round, matchIndex);
+
+    const slotIndex =
+        getPlayerSlot(round, matchIndex, pendingResult.player);
+
+    container.players[slotIndex] = result;
+
+    /*
+       ВАЖНО:
+       Победитель определяется только после того,
+       как оба участника пары получили результат.
+    */
+    const first = container.players[0];
+    const second = container.players[1];
+
+    if(first && second){
+
+        if(Number(first.x) > Number(second.x)){
+
+            container.winner = {
+                id:first.player.id,
+                name:first.player.name
+            };
+
+        }else if(Number(second.x) > Number(first.x)){
+
+            container.winner = {
+                id:second.player.id,
+                name:second.player.name
+            };
+
+        }else{
+
+            container.winner = null;
+
+        }
+
+    }else{
+
+        container.winner = null;
+    }
+
+    /*
+       Перед следующим раундом переносим только имя/id победителя.
+       Старый слот, сумма и X НЕ переносятся.
+    */
+    if(round === "round16"){
+        round16Winners[matchIndex] = container.winner;
+        const nextSemiIndex = Math.floor(matchIndex / 2);
+        roundResults.quarter[nextSemiIndex] = null;
+        quarterWinners[nextSemiIndex] = null;
+        const sfIndex = Math.floor(nextSemiIndex / 2);
+        roundResults.semi[sfIndex] = null;
+        semiWinners[sfIndex] = null;
+        roundResults.final = null;
+        champion = null;
+    }else if(round === "quarter"){
+        quarterWinners[matchIndex] = container.winner;
+        const sfIndex = Math.floor(matchIndex / 2);
+        roundResults.semi[sfIndex] = null;
+        semiWinners[sfIndex] = null;
+        roundResults.final = null;
+        champion = null;
+    }else if(round === "semi"){
+        semiWinners[matchIndex] = container.winner;
+        roundResults.final = null;
+        champion = null;
+    }else if(round === "final"){
+        champion = container.winner;
+    }
+
+    const justWonTournament =
+        round === "final" &&
+        container.winner &&
+        first &&
+        second;
+
+    pendingResult = null;
+
+    document
+        .getElementById("roundResultPanel")
+        .classList.add("hidden");
+
+    if(first && second){
+
+        if(container.winner){
+            document.getElementById("roundResultStatus").textContent =
+                "✅ Оба результата введены. Победитель определён по X.";
+        }else{
+            document.getElementById("roundResultStatus").textContent =
+                "⚖️ У участников одинаковый X. Победитель пока не определён.";
+        }
+
+    }else{
+
+        document.getElementById("roundResultStatus").textContent =
+            "✅ Результат сохранён. Введите результат второго участника пары.";
+    }
+
+    renderBracket();
+
+    if(justWonTournament && champion){
+        // Финал завершён — сразу показываем победителя поверх админки.
+        showWinnerOverlay(champion);
+    }else if(!first || !second){
+        // После первого результата этой пары сразу открываем соперника.
+        const opponent = getOpponentForResult(round, matchIndex, pendingResultPlayerId);
+        if(opponent){
+            setTimeout(() => openRoundResult(round, matchIndex, opponent), 220);
+        }
+    }else{
+        // Пара полностью закрыта — автоматически открываем следующую
+        // незавершённую пару этого раунда.
+        setTimeout(() => openNextUnresolvedMatch(round), 220);
+    }
+
+    await saveData();
+}
+
+
+/* ==========================================
+   СЕТКА
+========================================== */
+
+let winnerOverlayChampionId = null;
+let winnerConfettiFrame = null;
+
+function showWinnerOverlay(winner){
+    if(!winner){
+        return;
+    }
+
+    winnerOverlayChampionId = String(winner.id);
+
+    document.getElementById("adminWinnerName").textContent =
+        winner.name;
+
+    // Финальный бонус не рассчитываем по результату последнего слота.
+    // На экране просто показываем условия турнира.
+    document.getElementById("adminWinnerPrize").innerHTML =
+        "🎁 ВЫИГРАЛ БОНУС ЗА 10 000 ₽ — ПОЛОВИНА ОТ ПЛЮСОВ ЕГО<br>" +
+        "🎁 ЕСЛИ НИЧЕГО НЕ ДАСТ — УТЕШИТЕЛЬНЫЙ ПРИЗ 3 000 ₽";
+
+    document.getElementById("winnerOverlay")
+        .classList.add("show");
+
+    startAdminConfetti();
+}
+
+function closeWinnerOverlay(){
+    document.getElementById("winnerOverlay")
+        .classList.remove("show");
+
+    if(winnerConfettiFrame){
+        cancelAnimationFrame(winnerConfettiFrame);
+        winnerConfettiFrame = null;
+    }
+
+    const canvas = document.getElementById("adminConfettiCanvas");
+    if(canvas){
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+}
+
+function startAdminConfetti(){
+    const canvas = document.getElementById("adminConfettiCanvas");
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+
+    const pieces = Array.from({length:220}, () => ({
+        x: Math.random() * width,
+        y: -20 - Math.random() * height * .35,
+        w: 5 + Math.random() * 8,
+        h: 8 + Math.random() * 12,
+        vx: (Math.random() - .5) * 4,
+        vy: 2 + Math.random() * 5,
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - .5) * .25,
+        color: ["#ff1685","#ffd54a","#65ff4f","#00e5ff","#ffffff"]
+            [Math.floor(Math.random()*5)]
+    }));
+
+    const start = performance.now();
+
+    function frame(now){
+        ctx.clearRect(0,0,width,height);
+
+        for(const piece of pieces){
+            piece.x += piece.vx;
+            piece.y += piece.vy;
+            piece.vy += .025;
+            piece.rot += piece.vr;
+
+            ctx.save();
+            ctx.translate(piece.x,piece.y);
+            ctx.rotate(piece.rot);
+            ctx.fillStyle = piece.color;
+            ctx.fillRect(
+                -piece.w/2,
+                -piece.h/2,
+                piece.w,
+                piece.h
+            );
+            ctx.restore();
+        }
+
+        if(now - start < 8000){
+            winnerConfettiFrame = requestAnimationFrame(frame);
+        }else{
+            ctx.clearRect(0,0,width,height);
+            winnerConfettiFrame = null;
+        }
+    }
+
+    if(winnerConfettiFrame){
+        cancelAnimationFrame(winnerConfettiFrame);
+    }
+
+    winnerConfettiFrame = requestAnimationFrame(frame);
+}
+
+function renderBracket(){
+    renderRound16();
+    renderQuarterFinals();
+    renderSemiFinals();
+    renderFinal();
+    renderChampion();
+}
+
+function renderRound16(){
+    for(let i=0;i<8;i++){
+        const box=document.getElementById("r16m"+(i+1));
+        const p1=participants[i*2], p2=participants[i*2+1];
+        if(box){
+            box.innerHTML=`<div class="match">${fighterHtml(p1,getWinner("round16",i),"round16",i)}${fighterHtml(p2,getWinner("round16",i),"round16",i)}</div>${matchSummaryHtml("round16",i)}`;
+        }
+    }
+}
+
+function renderQuarterFinals(){
+    for(let i=0;i<4;i++){
+        const box=document.getElementById("qf"+(i+1));
+        const [p1,p2]=getRoundPlayers("quarter",i);
+        box.innerHTML=`<div class="match">${fighterHtml(p1,getWinner("quarter",i),"quarter",i)}${fighterHtml(p2,getWinner("quarter",i),"quarter",i)}</div>${matchSummaryHtml("quarter",i)}`;
+    }
+}
+
+function renderSemiFinals(){
+    for(let i=0;i<2;i++){
+        const box=document.getElementById("sf"+(i+1));
+        const [p1,p2]=getRoundPlayers("semi",i);
+        box.innerHTML=p1&&p2
+            ? `<div class="match">${fighterHtml(p1,getWinner("semi",i),"semi",i)}${fighterHtml(p2,getWinner("semi",i),"semi",i)}</div>${matchSummaryHtml("semi",i)}`
+            : `<div class="empty">Ждём победителей 1/4</div>`;
+    }
+}
+
+function renderFinal(){
+    const box=document.getElementById("finalMatch");
+    const [p1,p2]=getRoundPlayers("final",0);
+    if(!p1||!p2){ box.innerHTML=`<div class="empty">Ждём победителей полуфиналов</div>`; return; }
+    box.innerHTML=`<div class="match">${fighterHtml(p1,getWinner("final",0),"final",0)}${fighterHtml(p2,getWinner("final",0),"final",0)}</div>${matchSummaryHtml("final",0)}`;
+}
+
+function renderChampion(){
+
+    const box = document.getElementById("championSide");
+    const finalResult = roundResults.final;
+
+    if(!champion || !finalResult || !finalResult.winner){
+
+        box.innerHTML =
+            `<div class="empty">Финал ещё не сыгран</div>`;
+
+        document.getElementById("championBox").style.display = "none";
+        return;
+    }
+
+    const winningResult =
+        finalResult.players.find(r =>
+            r && r.player &&
+            String(r.player.id) === String(champion.id)
+        );
+
+    const championX =
+        winningResult ? Number(winningResult.x) : 0;
+
+    box.innerHTML = `
+        <div class="match">
+            <div class="fighter selected" style="cursor:default">
+                <span class="fighter-name">
+                    🏆 ${escapeHtml(champion.name)}
+                </span>
+                <span class="fighter-x">
+                    ${championX.toFixed(2)}X
+                </span>
+            </div>
+        </div>
+    `;
+
+    document.getElementById("championBox").style.display = "block";
+    document.getElementById("championName").textContent = champion.name;
+    document.getElementById("championX").textContent =
+        championX.toFixed(2) + "X";
+}
+
+
+/* ==========================================
+   КАРТОЧКИ
+========================================== */
+
+function fighterHtml(player, winner, round, matchIndex){
+
+    if(!player){
+        return `<div class="fighter disabled">—</div>`;
+    }
+
+    const selected =
+        winner &&
+        String(winner.id) === String(player.id)
+        ? "selected"
+        : "";
+
+    const result =
+        getPlayerResult(round, matchIndex, player);
+
+    let resultText = "";
+
+    if(result){
+
+        resultText = `
+            <div class="result-line">
+                🎰 ${escapeHtml(result.slot)}<br>
+                💰 ${formatMoney(result.cost)} → ${formatMoney(result.win)}<br>
+                <strong>${Number(result.x).toFixed(2)}X</strong>
+            </div>
+        `;
+
+    }else{
+
+        resultText = `
+            <div class="need-result">
+                Результат этого раунда ещё не введён
+            </div>
+        `;
+    }
+
+    const winnerBadge =
+        selected
+        ? `<div class="winner-badge">🏆 ПОБЕДИТЕЛЬ ПАРЫ</div>`
+        : "";
+
+    return `
+        <div
+            id="fighter-${round}-${matchIndex}-${encodeURIComponent(String(player.id))}"
+            class="fighter ${selected}"
+            onclick="openRoundResult('${round}',${matchIndex},participants.find(p => String(p.id) === '${String(player.id)}'))"
+        >
+            <span class="fighter-name">
+                ${escapeHtml(player.name)}
+            </span>
+            ${resultText}
+            ${winnerBadge}
+        </div>
+    `;
+}
+
+
+function matchSummaryHtml(round, matchIndex){
+
+    const container =
+        getMatchResultContainer(round, matchIndex);
+
+    if(!container){
+        return `
+            <div class="status" style="font-size:12px;color:#777">
+                Введите результат обоих участников пары
+            </div>
+        `;
+    }
+
+    const first = container.players[0];
+    const second = container.players[1];
+
+    if(first && second && container.winner){
+
+        const loser =
+            String(first.player.id) === String(container.winner.id)
+            ? second
+            : first;
+
+        return `
+            <div class="status" style="text-align:left;font-size:12px;line-height:1.5">
+                <strong style="color:var(--green)">🏆 ${escapeHtml(container.winner.name)} проходит дальше</strong><br>
+                ${escapeHtml(container.winner.name)} — ${getResultX(container, container.winner.id).toFixed(2)}X<br>
+                ${escapeHtml(loser.player.name)} — ${Number(loser.x).toFixed(2)}X
+            </div>
+        `;
+    }
+
+    if(first && second){
+        return `
+            <div class="status" style="text-align:left;font-size:12px;line-height:1.5;color:#ffd54a">
+                ⚖️ Одинаковый X — победитель не определён
+            </div>
+        `;
+    }
+
+    if(first || second){
+        const only = first || second;
+        return `
+            <div class="status" style="font-size:12px;color:#aaa">
+                Результат одного участника сохранён. Теперь введи результат соперника.
+            </div>
+        `;
+    }
+
+    return "";
+}
+
+
+function getResultX(container, playerId){
+
+    const result = container.players.find(r =>
+        r && r.player &&
+        String(r.player.id) === String(playerId)
+    );
+
+    return result ? Number(result.x) : 0;
+}
+
+
+/* ==========================================
+   SUPABASE СОХРАНЕНИЕ
+========================================== */
+
+async function saveData(){
+
+    const state = {
+        participants:participants,
+        tournamentStarted:tournamentStarted,
+        round16Winners:round16Winners,
+        quarterWinners:quarterWinners,
+        semiWinners:semiWinners,
+        champion:champion,
+        roundResults:roundResults,
+        slotAssignments:slotAssignments,
+        usedSlotIds:Array.from(usedSlotIds),
+        updatedAt:new Date().toISOString()
+    };
+
+    const {error} =
+        await supabaseClient
+            .from("tournaments")
+            .upsert({
+                id:1,
+                title:"Клубничка",
+                prize:
+                    roundResults.final && roundResults.final.winner
+                    ? String(getResultX(roundResults.final, roundResults.final.winner.id))
+                    : "0",
+                data:state
+            });
+
+    const status = document.getElementById("saveStatus");
+
+    if(error){
+
+        if(status){
+            status.textContent =
+                "❌ Ошибка сохранения: " + error.message;
+        }
+
+        console.error(error);
+        return false;
+    }
+
+    if(status){
+        status.textContent = "✅ Данные сохранены";
+    }
+
+    return true;
+}
+
+
+/* ==========================================
+   ЗАГРУЗКА
+========================================== */
+
+async function loadData(){
+
+    const {data,error} =
+        await supabaseClient
+            .from("tournaments")
+            .select("*")
+            .eq("id",1)
+            .maybeSingle();
+
+    if(error){
+
+        console.error(error);
+
+        document.getElementById("saveStatus").textContent =
+            "❌ Ошибка загрузки: " + error.message;
+
+        return;
+    }
+
+    if(!data || !data.data){
+
+        renderTable();
+
+        document.getElementById("saveStatus").textContent =
+            "Готово. Можно добавлять участников.";
+
+        return;
+    }
+
+    const state = data.data;
+
+    participants =
+        Array.isArray(state.participants)
+        ? state.participants.map(p => ({
+            id:p.id ?? (Date.now() + Math.random()),
+            name:String(p.name ?? "")
+        }))
+        : [];
+
+    tournamentStarted = Boolean(state.tournamentStarted);
+
+    round16Winners =
+        normalizeWinnerArray(state.round16Winners,8);
+
+    quarterWinners =
+        normalizeWinnerArray(state.quarterWinners,4);
+
+    semiWinners =
+        normalizeWinnerArray(state.semiWinners,2);
+
+    champion = normalizeWinner(state.champion);
+
+    roundResults = normalizeRoundResults(state.roundResults);
+    slotAssignments = state.slotAssignments && typeof state.slotAssignments === "object"
+        ? state.slotAssignments
+        : {};
+    usedSlotIds = new Set(
+        Array.isArray(state.usedSlotIds)
+            ? state.usedSlotIds.map(String)
+            : Object.values(slotAssignments).map(String)
+    );
+    syncUsedSlots();
+
+    renderTable();
+
+    if(participants.length === 16 && !tournamentStarted){
+        const startBox = document.getElementById("startTournamentBox");
+        startBox.classList.remove("hidden");
+        setTimeout(() => {
+            startBox.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        }, 180);
+    }else{
+        document
+            .getElementById("startTournamentBox")
+            .classList.add("hidden");
+    }
+
+    if(tournamentStarted){
+        document
+            .getElementById("bracketPanel")
+            .classList.remove("hidden");
+        renderBracket();
+    }else{
+        document
+            .getElementById("bracketPanel")
+            .classList.add("hidden");
+    }
+
+    document.getElementById("saveStatus").textContent =
+        "✅ Данные загружены";
+}
+
+
+/* ==========================================
+   НОРМАЛИЗАЦИЯ
+========================================== */
+
+function normalizeWinner(value){
+
+    if(!value || typeof value !== "object" || value.id === undefined){
+        return null;
+    }
+
+    return {
+        id:value.id,
+        name:String(value.name ?? "")
+    };
+}
+
+function normalizeWinnerArray(value,length){
+
+    const arr = Array.isArray(value) ? value : [];
+
+    return Array.from(
+        {length:length},
+        (_,i)=>normalizeWinner(arr[i])
+    );
+}
+
+function normalizeMatchResult(value){
+
+    if(!value || typeof value !== "object"){
+        return null;
+    }
+
+    const players = Array.isArray(value.players)
+        ? value.players
+        : [
+            value.player || null,
+            null
+        ];
+
+    const normalizedPlayers = [0,1].map(i => {
+
+        const r = players[i];
+
+        if(!r || !r.player){
+            return null;
+        }
+
+        const cost = Number(r.cost) || 0;
+        const win = Number(r.win) || 0;
+
+        return {
+            player:{
+                id:r.player.id,
+                name:String(r.player.name ?? "")
+            },
+            slot:String(r.slot ?? ""),
+            cost:cost,
+            win:win,
+            x:cost > 0 ? win / cost : 0
+        };
+    });
+
+    let winner = normalizeWinner(value.winner);
+
+    /* Для старых/неполных данных пересчитываем победителя. */
+    if(!winner && normalizedPlayers[0] && normalizedPlayers[1]){
+
+        if(Number(normalizedPlayers[0].x) > Number(normalizedPlayers[1].x)){
+            winner = normalizeWinner(normalizedPlayers[0].player);
+        }else if(Number(normalizedPlayers[1].x) > Number(normalizedPlayers[0].x)){
+            winner = normalizeWinner(normalizedPlayers[1].player);
+        }
+    }
+
+    return {
+        players:normalizedPlayers,
+        winner:winner
+    };
+}
+
+function normalizeRoundResults(value){
+    if(!value){
+        return {round16:Array(8).fill(null),quarter:Array(4).fill(null),semi:Array(2).fill(null),final:null};
+    }
+    const r16=Array.isArray(value.round16)?value.round16:[];
+    const q=Array.isArray(value.quarter)?value.quarter:[];
+    const s=Array.isArray(value.semi)?value.semi:[];
+    return {
+        round16:Array.from({length:8},(_,i)=>normalizeMatchResult(r16[i])),
+        quarter:Array.from({length:4},(_,i)=>normalizeMatchResult(q[i])),
+        semi:Array.from({length:2},(_,i)=>normalizeMatchResult(s[i])),
+        final:normalizeMatchResult(value.final)
+    };
+}
+
+/* ==========================================
+   ВСПОМОГАТЕЛЬНЫЕ
+========================================== */
+
+function formatMoney(value){
+    return Number(value).toLocaleString("ru-RU") + " ₽";
+}
+
+function escapeHtml(text){
+    return String(text)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+
+/* ==========================================
+   ПРОВЕРКА СЕССИИ
+========================================== */
+
+async function checkSession(){
+
+    const {data,error} =
+        await supabaseClient.auth.getSession();
+
+    if(error){
+        console.error(error);
+        return;
+    }
+
+    if(data.session){
+
+        document
+            .getElementById("loginScreen")
+            .classList.add("hidden");
+
+        document
+            .getElementById("adminScreen")
+            .classList.remove("hidden");
+
+        await loadData();
+    }
+}
+
+checkSession();
+
+</script>
+
+</body>
+</html>
